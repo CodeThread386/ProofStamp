@@ -146,7 +146,14 @@ app.use((err, req, res, next) => {
   if (err.message && err.message.includes('File type')) {
     return res.status(415).json({ error: err.message });
   }
+  
   console.error(err.stack);
+
+  // If this is a browser navigation (like a Google OAuth callback error), redirect to the beautiful frontend UI
+  if (req.path.startsWith('/auth/') && req.accepts('html', 'json') === 'html') {
+    return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+  }
+
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
   });
