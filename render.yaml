@@ -1,11 +1,13 @@
 databases:
   - name: proofstamp-db
+    plan: free
 
 services:
   # Python Stego Service (Requires Docker to install system dependencies like libgl)
   - type: web
     name: proofstamp-stego
     env: docker
+    plan: free
     dockerContext: .
     dockerfilePath: ./stego-service/Dockerfile
     envVars:
@@ -16,6 +18,7 @@ services:
   - type: web
     name: proofstamp-server
     env: node
+    plan: free
     rootDir: server
     buildCommand: npm install && npm run prisma:generate
     startCommand: npm start
