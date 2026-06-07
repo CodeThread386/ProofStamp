@@ -66,7 +66,6 @@ export default function SettingsPage() {
 
   function handleLogout() {
     logout();
-    navigate('/login');
   }
 
   async function handleDeleteAccount() {

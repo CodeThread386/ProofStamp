@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Shield,
@@ -27,26 +28,13 @@ export default function Layout({ children }) {
   useEffect(() => {
     if (!user) return undefined;
 
-    const token = localStorage.getItem('proofstamp_token');
     let cancelled = false;
 
     async function poll() {
       try {
-        const res = await fetch(
-          `${API_URL}/notifications?limit=1`,
-          {
-            headers: token
-              ? { Authorization: `Bearer ${token}` }
-              : {},
-          }
-        );
-
-        if (!res.ok) return;
-
-        const data = await res.json();
-
+        const res = await api.get('/notifications?limit=1');
         if (!cancelled) {
-          setUnreadCount(data.unreadCount || 0);
+          setUnreadCount(res.data.unreadCount || 0);
         }
       } catch {
         /* ignore */
@@ -65,7 +53,6 @@ export default function Layout({ children }) {
 
   function handleLogout() {
     logout();
-    navigate('/login');
   }
 
   const DesktopNavLink = ({ to, icon: Icon, label, alertCount }) => (

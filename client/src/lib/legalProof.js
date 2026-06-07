@@ -1,47 +1,49 @@
 import { MARKETING, TSA_BADGES } from '@/content/legalCopy';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '@/lib/api';
 
 export async function downloadCounselPacket(stampId) {
-  const token = localStorage.getItem('proofstamp_token');
-  const res = await fetch(`${API_URL}/legal/${stampId}/litigation-pack`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || err.error || 'Download failed');
+  try {
+    const res = await api.get(`/legal/${stampId}/litigation-pack`, {
+      responseType: 'blob'
+    });
+    const blob = new Blob([res.data]);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${stampId}-counsel-evidence-packet.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (err) {
+    let msg = 'Download failed';
+    if (err.response?.data instanceof Blob) {
+      try {
+        const text = await err.response.data.text();
+        const json = JSON.parse(text);
+        msg = json.error || json.message || msg;
+      } catch (e) {}
+    } else if (err.response?.data) {
+      msg = err.response.data.error || err.response.data.message || msg;
+    }
+    throw new Error(msg);
   }
-  const blob = await res.blob();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${stampId}-counsel-evidence-packet.zip`;
-  a.click();
-  URL.revokeObjectURL(a.href);
 }
 
 /** @deprecated use downloadCounselPacket */
 export const downloadLitigationPack = downloadCounselPacket;
 
 export async function attestCreator(stampId, { fullName, city, country }) {
-  const token = localStorage.getItem('proofstamp_token');
-  const res = await fetch(`${API_URL}/legal/${stampId}/attest`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
+  try {
+    const res = await api.post(`/legal/${stampId}/attest`, {
       fullName,
       city,
       country,
       confirm: true,
       statementConfirm: true,
       statementVersion: '2.0',
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.message || 'Attestation failed');
-  return data;
+    });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.error || err.response?.data?.message || 'Attestation failed');
+  }
 }
 
 export function legalStatusBadges(stamp) {

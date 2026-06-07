@@ -29,13 +29,7 @@ function generateLegalNotice(stamp, passport, infringingUrl, platform, type = 'c
     : `- ${BSA_FRAME.shortLabel}: ${baseUrl}/legal/${stamp.id}/system-certificate`;
 
   if (type === 'deepfake') {
-    return `URGENT: STATUTORY GRIEVANCE NOTICE — IMPERSONATION / DEEPFAKE
-Date: ${date}
-
-To: The Resident Grievance Officer, ${platform}
-Re: Immediate 24-Hour Takedown Request under Rule 3(2)(b) of the IT (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021
-
-I, ${passport.displayName} (@${passport.username}), am the individual depicted in the original image/content described below. I am writing to notify you that the content hosted at the URL below is a digitally manipulated, non-consensual deepfake or impersonation of my likeness.
+    return `I, ${passport.displayName} (@${passport.username}), am the individual depicted in the original image/content described below. I am writing to notify you that the content hosted at the URL below is a digitally manipulated, non-consensual deepfake or impersonation of my likeness.
 
 ORIGINAL VERIFIED IDENTITY RECORD:
 - Stamp ID: ${stamp.id}
@@ -64,13 +58,7 @@ ProofStamp ID: ${passport.id}
 Username: @${passport.username}`;
   }
 
-  return `DMCA & IT RULES 2021 TAKEDOWN NOTICE
-Date: ${date}
-
-To: ${platform} Copyright/Grievance Officer
-Re: Copyright Infringement — Takedown Request (Rule 3(1)(b)(iv) of IT Rules 2021)
-
-I, ${passport.displayName} (@${passport.username}), am the exclusive rights holder of the copyrighted work described below. I am writing to notify you of an infringement of my copyright.
+  return `I, ${passport.displayName} (@${passport.username}), am the exclusive rights holder of the copyrighted work described below. I am writing to notify you of an infringement of my copyright.
 
 ORIGINAL WORK:
 - Title: ${stamp.title}

@@ -38,8 +38,8 @@ export default function Login() {
     setMode(nextMode);
   }
 
-  function finishAuth(token, needsSetup) {
-    login(token);
+  function finishAuth(needsSetup) {
+    login();
     navigate(needsSetup ? '/setup' : '/dashboard');
   }
 
@@ -68,7 +68,7 @@ export default function Login() {
       const res = await api.post('/auth/email/verify-code', { email, code, purpose });
 
       if (purpose === 'login') {
-        finishAuth(res.data.token, res.data.needsSetup);
+        finishAuth(res.data.needsSetup);
         return;
       }
 
@@ -92,7 +92,7 @@ export default function Login() {
         displayName,
         username: username || undefined,
       });
-      finishAuth(res.data.token, res.data.needsSetup);
+      finishAuth(res.data.needsSetup);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create account');
     } finally {

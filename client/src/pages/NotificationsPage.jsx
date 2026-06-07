@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Bell, Loader2 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -13,12 +12,8 @@ export default function NotificationsPage() {
 
   async function load() {
     try {
-      const token = localStorage.getItem('proofstamp_token');
-      const res = await fetch(`${API_URL}/notifications?limit=100`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
-      setNotifications(data.notifications || []);
+      const res = await api.get('/notifications?limit=100');
+      setNotifications(res.data.notifications || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -31,21 +26,21 @@ export default function NotificationsPage() {
   }, []);
 
   async function markRead(id) {
-    const token = localStorage.getItem('proofstamp_token');
-    await fetch(`${API_URL}/notifications/${id}/read`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    load();
+    try {
+      await api.post(`/notifications/${id}/read`);
+      load();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async function markAllRead() {
-    const token = localStorage.getItem('proofstamp_token');
-    await fetch(`${API_URL}/notifications/read-all`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    load();
+    try {
+      await api.post('/notifications/read-all');
+      load();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   if (loading) {

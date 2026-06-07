@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -75,6 +76,12 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    const disableBFCache = () => {};
+    window.addEventListener('unload', disableBFCache);
+    return () => window.removeEventListener('unload', disableBFCache);
+  }, []);
+
   return (
     <BrowserRouter>
       <ToastProvider>

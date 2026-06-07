@@ -9,12 +9,16 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('proofstamp_token');
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
+    fetchUser();
+
+    const handlePageShow = (e) => {
+      if (e.persisted) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   async function fetchUser() {
@@ -23,21 +27,26 @@ export function AuthProvider({ children }) {
       setUser(res.data.user);
       setPassport(res.data.passport);
     } catch {
-      localStorage.removeItem('proofstamp_token');
+      setUser(null);
+      setPassport(null);
     } finally {
       setLoading(false);
     }
   }
 
-  function login(token) {
-    localStorage.setItem('proofstamp_token', token);
+  function login() {
     fetchUser();
   }
 
-  function logout() {
-    localStorage.removeItem('proofstamp_token');
+  async function logout() {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // ignore error on logout
+    }
     setUser(null);
     setPassport(null);
+    window.location.replace('/login');
   }
 
   return (

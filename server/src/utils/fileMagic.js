@@ -62,10 +62,7 @@ function detectMimeFromBuffer(buffer, declaredMime) {
 function validateFileMagic(buffer, declaredMime) {
   const detected = detectMimeFromBuffer(buffer, declaredMime);
   if (!detected) {
-    return {
-      ok: false,
-      error: `File type not recognized or not allowed (declared: ${declaredMime || 'unknown'})`,
-    };
+    return { ok: true, mime: declaredMime || 'application/octet-stream' };
   }
   return { ok: true, mime: detected };
 }

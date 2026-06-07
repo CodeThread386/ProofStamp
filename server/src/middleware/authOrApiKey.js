@@ -6,10 +6,16 @@ const prisma = require('../config/prisma');
  * Accept Bearer JWT or X-ProofStamp-Api-Key / X-Api-Key for stamp API automation.
  */
 async function authOrApiKey(req, res, next) {
-  const authHeader = req.headers.authorization;
+  let token = req.cookies?.proofstamp_token;
 
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
+  }
+
+  if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;

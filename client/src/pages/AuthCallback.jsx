@@ -9,16 +9,11 @@ export default function AuthCallback() {
   const { login } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      login(token);
-      const needsSetup = searchParams.get('needsSetup') === '1';
-      setTimeout(() => {
-        navigate(needsSetup ? '/setup' : '/dashboard');
-      }, 500);
-    } else {
-      navigate('/login?error=no_token');
-    }
+    login();
+    const needsSetup = searchParams.get('needsSetup') === '1';
+    setTimeout(() => {
+      navigate(needsSetup ? '/setup' : '/dashboard');
+    }, 500);
   }, [searchParams, login, navigate]);
 
   return (

@@ -106,7 +106,12 @@ export default function TakedownPage() {
       : 'DMCA & IT RULES 2021 TAKEDOWN NOTICE';
     const subject = `${subjectPrefix} - ${subjectTitle}`;
     
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(td.dmcaLetter || '')}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const attachmentsText = `\n\n--- ENCLOSED ATTACHMENTS ---\n1. BSA Section 63 Digital Evidence Certificate: ${apiUrl}/legal/${td.stampId}/system-certificate\n2. Legal Litigation Packet (Zip): ${apiUrl}/legal/${td.stampId}/litigation-pack\n\nPlease download and review the enclosed digital evidence for cryptographically signed proof of ownership.`;
+    
+    const bodyText = (td.dmcaLetter || '') + attachmentsText;
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
     window.open(gmailUrl, '_blank');
   };
 

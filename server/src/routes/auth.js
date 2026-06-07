@@ -24,9 +24,24 @@ router.get(
     const user = req.user;
     const token = issueAuthToken(user);
     const needsSetup = user.passport?.username ? '0' : '1';
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}&needsSetup=${needsSetup}`);
+    res.cookie('proofstamp_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    });
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?needsSetup=${needsSetup}`);
   }
 );
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('proofstamp_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  res.json({ message: 'Logged out' });
+});
 
 router.get('/me', authMeLimiter, authMiddleware, async (req, res) => {
   try {
