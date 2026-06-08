@@ -51,8 +51,6 @@ export function AuthProvider({ children }) {
       // ignore error on logout
     }
     localStorage.removeItem('token');
-    setUser(null);
-    setPassport(null);
     window.location.replace('/');
   }
 
