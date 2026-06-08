@@ -15,6 +15,7 @@ const { uploadBuffer, getThumbnailUrl } = require('../config/cloudinary');
 const { decryptPrivateKey, computeHash, signData } = require('../utils/crypto');
 const { enforceStampQuota, stampCreatePerUserLimiter } = require('../middleware/rateLimiter');
 const { findGlobalDuplicate } = require('../services/duplicateCheck');
+const { notifyDuplicateAttempt } = require('../services/notifications');
 const { getTimestampToken, verifyTimestampTokenFull } = require('../services/timestamping');
 const {
   requiresTsaOnStamp,
@@ -531,6 +532,12 @@ router.post('/', authOrApiKey, stampCreatePerUserLimiter, enforceStampQuota, upl
     ]);
 
     if (duplicate) {
+      // Alert the original owner that someone tried to re-register their work.
+      // Fire-and-forget so it never delays the 409 or breaks the upload path.
+      notifyDuplicateAttempt(duplicate.existingStampId, {
+        attemptedByUsername: passportRecord?.username,
+        attemptedByUserId: req.user.userId,
+      }).catch(() => {});
       return res.status(409).json(duplicate);
     }
 
@@ -656,6 +663,11 @@ router.post('/bulk', authOrApiKey, stampCreatePerUserLimiter, enforceStampQuota,
 
       const duplicate = await findGlobalDuplicate(file, serverHash);
       if (duplicate) {
+        // Alert the original owner of the attempted re-registration (fire-and-forget).
+        notifyDuplicateAttempt(duplicate.existingStampId, {
+          attemptedByUsername: passportRecord?.username,
+          attemptedByUserId: req.user.userId,
+        }).catch(() => {});
         results.push({
           stampId: null, title,
           category: categorizeFile(file.mimetype, file.originalname),
