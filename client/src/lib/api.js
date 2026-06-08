@@ -16,8 +16,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-
-    if (status === 401 && !isPublicAuthRoute()) {
+    const originalRequestUrl = error.config?.url;
+    if (
+      status === 401 &&
+      !isPublicAuthRoute() &&
+      originalRequestUrl !== '/auth/me'
+    ) {
       window.location.href = '/login';
     }
 

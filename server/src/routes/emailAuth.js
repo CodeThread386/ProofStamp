@@ -130,7 +130,7 @@ router.post('/verify-code', emailVerifyCodeLimiter, async (req, res) => {
       res.cookie('proofstamp_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000
       });
       return res.json({
@@ -203,7 +203,7 @@ router.post('/complete-signup', async (req, res) => {
     res.cookie('proofstamp_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
     res.status(201).json({
