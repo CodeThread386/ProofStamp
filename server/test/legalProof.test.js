@@ -1,7 +1,7 @@
 /**
  * Run: node test/legalProof.test.js (from server/)
  */
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 process.env.TSA_MODE = process.env.TSA_MODE || 'development';
 
 const assert = require('assert');

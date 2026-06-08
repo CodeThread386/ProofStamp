@@ -1,7 +1,7 @@
 /**
  * Run: node test/counselZip.test.js (from server/)
  */
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const assert = require('assert');
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');

@@ -2,7 +2,7 @@
  * Run: node test/apiVerify.test.js (from server/)
  * Contract shape test using a minimal mock stamp object through route helpers.
  */
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const assert = require('assert');
 const { buildVerifyInstructions } = require('../src/utils/verifyInstructions');
 

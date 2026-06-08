@@ -2,7 +2,7 @@
  * Run: node test/tsaFallback.test.js (from server/)
  * Mocks axios to verify fallback order when primary TSA fails.
  */
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const assert = require('assert');
 const crypto = require('crypto');
 

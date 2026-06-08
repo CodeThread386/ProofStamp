@@ -6,7 +6,7 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
 const uploadsRoot = path.join(__dirname, '../uploads');
 for (const sub of ['originals', 'stamped', 'certificates']) {
