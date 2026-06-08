@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const prisma = require('../config/prisma');
 const { sendDMCAEmail, getPlatformConfig } = require('../services/takedownAutomation');
+const { sendTakedownEscalationNotice } = require('../services/notifications');
 
 /**
  * Check for takedowns past their response deadline and escalate.
@@ -18,7 +19,13 @@ async function checkEscalations() {
       },
       include: {
         stamp: { select: { id: true, title: true } },
-        passport: { select: { displayName: true, username: true } },
+        passport: {
+          select: {
+            displayName: true,
+            username: true,
+            user: { select: { id: true, email: true } },
+          },
+        },
       },
     });
 
@@ -43,6 +50,8 @@ async function checkEscalations() {
             ].join(''),
           },
         });
+
+        await sendTakedownEscalationNotice({ takedown, kind: 'escalated' });
 
         escalated++;
       } catch (err) {
@@ -78,16 +87,31 @@ async function sendFollowUpReminders() {
       },
       include: {
         stamp: { select: { id: true, title: true } },
-        passport: { select: { displayName: true, username: true } },
+        passport: {
+          select: {
+            displayName: true,
+            username: true,
+            user: { select: { id: true, email: true } },
+          },
+        },
       },
     });
 
-    // Log approaching deadlines (actual notification would go through a notification system)
     if (approaching.length > 0) {
       console.log(`[TakedownEscalation] ${approaching.length} takedowns approaching deadline`);
     }
 
-    return { approaching: approaching.length };
+    let notified = 0;
+    for (const takedown of approaching) {
+      try {
+        await sendTakedownEscalationNotice({ takedown, kind: 'approaching' });
+        notified++;
+      } catch (err) {
+        console.error(`[TakedownEscalation] Reminder failed for ${takedown.id}:`, err.message);
+      }
+    }
+
+    return { approaching: approaching.length, notified };
   } catch (err) {
     console.error('[TakedownEscalation] Reminder check failed:', err);
     return { approaching: 0 };

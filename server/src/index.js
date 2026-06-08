@@ -38,6 +38,7 @@ const { startOtsUpgradeJob } = require('./jobs/otsUpgrade');
 const { startAuditHeadGithubJob } = require('./jobs/auditHeadGithub');
 const { startScheduledScanner } = require('./jobs/scheduledScanner');
 const { startAIRegistryScanJob } = require('./jobs/aiRegistryScan');
+const { startTakedownEscalationJob } = require('./jobs/takedownEscalation');
 const { getPlatformPublicKeyPem } = require('./services/platformSigning');
 
 const {
@@ -142,6 +143,43 @@ Disallow-Training: /
 `);
 });
 
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`# ProofStamp robots.txt
+# https://proofstamp.app
+#
+# General crawling is allowed. AI/ML training on registered works is NOT.
+# AI training policy and per-agent rules: /ai.txt
+#
+# Programmatic opt-out lookup for AI companies:
+#   GET /registry/check?hash=<sha256>&phash=<perceptual_hash>
+#   GET /registry/bulk            (paginated export of opted-out works)
+#   GET /registry/declaration.txt (human-readable opt-out declaration)
+
+User-agent: *
+Disallow: /uploads/
+
+# AI training crawlers — disallowed entirely
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+`);
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -183,6 +221,7 @@ connectDatabase()
     startWebhookRetryJob();
     startAuditHeadGithubJob();
     startAIRegistryScanJob();
+    startTakedownEscalationJob();
     if (process.env.BLOCKCHAIN_ANCHOR_DISABLED !== 'true') {
       startBlockchainAnchorJob();
       startOtsUpgradeJob();
