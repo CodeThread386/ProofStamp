@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setUser(null);
     setPassport(null);
-    window.location.replace('/login');
+    window.location.replace('/');
   }
 
   return (
