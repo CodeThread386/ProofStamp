@@ -208,17 +208,13 @@ router.post('/scan/:stampId', authMiddleware, async (req, res) => {
           },
         });
         newAlerts.push(alert);
-        try {
-          await sendMonitorAlertEmail({
-            userId: req.user.userId,
-            userEmail: passport.user?.email,
-            displayName: passport.displayName,
-            stamp,
-            alert,
-          });
-        } catch (mailErr) {
-          console.warn('Alert email failed:', mailErr.message);
-        }
+        sendMonitorAlertEmail({
+          userId: req.user.userId,
+          userEmail: passport.user?.email,
+          displayName: passport.displayName,
+          stamp,
+          alert,
+        }).catch((mailErr) => console.warn('Alert email failed:', mailErr.message));
       }
     }
 
@@ -229,16 +225,16 @@ router.post('/scan/:stampId', authMiddleware, async (req, res) => {
       externalResults = await performExternalScan(stamp);
 
       // Verify external results to filter false positives
-      for (const result of externalResults) {
+      const verifyPromises = externalResults.map(async (result) => {
         if ((result.engine === 'google_lens' || result.engine === 'tineye') && result.thumbnailUrl) {
           const verified = await verifyExternalMatch(result, stamp);
-          if (verified) {
-            verifiedExternalResults.push(verified);
-          }
-        } else {
-          verifiedExternalResults.push(result);
+          return verified ? verified : null;
         }
-      }
+        return result;
+      });
+      
+      const verifiedResultsRaw = await Promise.all(verifyPromises);
+      verifiedExternalResults = verifiedResultsRaw.filter(r => r !== null);
 
       for (const result of verifiedExternalResults) {
         const existing = await prisma.monitorAlert.findFirst({
@@ -259,17 +255,13 @@ router.post('/scan/:stampId', authMiddleware, async (req, res) => {
             },
           });
           newAlerts.push(alert);
-          try {
-            await sendMonitorAlertEmail({
-              userId: req.user.userId,
-              userEmail: passport.user?.email,
-              displayName: passport.displayName,
-              stamp,
-              alert,
-            });
-          } catch (mailErr) {
-            console.warn('Alert email failed:', mailErr.message);
-          }
+          sendMonitorAlertEmail({
+            userId: req.user.userId,
+            userEmail: passport.user?.email,
+            displayName: passport.displayName,
+            stamp,
+            alert,
+          }).catch((mailErr) => console.warn('Alert email failed:', mailErr.message));
         }
       }
     } catch (extErr) {
