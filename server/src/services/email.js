@@ -1,25 +1,35 @@
-const nodemailer = require('nodemailer');
-
-let transporter = null;
+const axios = require('axios');
 
 function isSmtpConfigured() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  return Boolean(process.env.GMAIL_CLIENT_ID && process.env.GMAIL_CLIENT_SECRET && process.env.GMAIL_REFRESH_TOKEN);
 }
 
-function getTransporter() {
-  if (!isSmtpConfigured()) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
-  return transporter;
+async function refreshAccessToken() {
+  const response = await axios.post('https://oauth2.googleapis.com/token', {
+    client_id: process.env.GMAIL_CLIENT_ID,
+    client_secret: process.env.GMAIL_CLIENT_SECRET,
+    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
+    grant_type: 'refresh_token',
+  });
+  return response.data.access_token;
+}
+
+function makeBase64UrlEmail(to, from, subject, html) {
+  const messageParts = [
+    `From: ProofStamp <${from}>`,
+    `To: ${to}`,
+    'Content-Type: text/html; charset=utf-8',
+    'MIME-Version: 1.0',
+    `Subject: ${subject}`,
+    '',
+    html,
+  ];
+  const message = messageParts.join('\n');
+  return Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 async function sendVerificationCode(email, code, purpose = 'signup') {
@@ -40,22 +50,28 @@ async function sendVerificationCode(email, code, purpose = 'signup') {
   const from = process.env.SMTP_FROM || process.env.SMTP_USER;
 
   if (!isSmtpConfigured()) {
-    console.log(`[Email] SMTP not configured — code for ${email}: ${code}`);
+    console.log(`[Email] Gmail API not configured — code for ${email}: ${code}`);
     return { devMode: true };
   }
 
-  const transport = getTransporter();
   try {
-    await transport.sendMail({
-      from: `"ProofStamp" <${from}>`,
-      to: email,
-      subject,
-      html,
-      text: `Your ProofStamp verification code is: ${code}\n\nExpires in 10 minutes.`,
-    });
+    const accessToken = await refreshAccessToken();
+    const rawMessage = makeBase64UrlEmail(email, from, subject, html);
+
+    await axios.post(
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
+      { raw: rawMessage },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (err) {
-    console.error(`[Email Error] Failed to send to ${email}:`, err.message);
-    return { devMode: true, error: err.message, code };
+    const errorMsg = err.response?.data?.error?.message || err.message;
+    console.error(`[Email Error] Failed to send to ${email}:`, errorMsg);
+    return { devMode: true, error: errorMsg, code };
   }
 
   return { sent: true };
