@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { ZipArchive } = require('archiver');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const {
   LEGAL_SIGNATORY,
@@ -423,6 +422,7 @@ function buildArtifactsList(stamp, passport, baseUrl) {
 }
 
 async function buildLitigationPackZip(stamp, passport, user, proofBundleJson, options = {}) {
+  const { ZipArchive } = await import('archiver');
   const {
     systemCertBuffer,
     creatorDeclarationBuffer,
