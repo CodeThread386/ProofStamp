@@ -207,7 +207,7 @@ router.post('/complete-signup', async (req, res) => {
     });
   } catch (error) {
     console.error('Complete signup error:', error);
-    res.status(500).json({ error: 'Failed to create account' });
+    res.status(500).json({ error: error.message || error.toString() || 'Failed to create account' });
   }
 });
 
