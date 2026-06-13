@@ -178,7 +178,9 @@ app.use((err, req, res, next) => {
 
   // If this is a browser navigation (like a Google OAuth callback error), redirect to the beautiful frontend UI
   if (req.path.startsWith('/auth/') && req.accepts('html', 'json') === 'html') {
-    return res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
+    const defaultClientUrl = 'https://proof-stamp.vercel.app';
+    const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : defaultClientUrl;
+    return res.redirect(`${clientUrl}/login?error=server_error`);
   }
 
   res.status(err.status || 500).json({

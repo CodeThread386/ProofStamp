@@ -45,13 +45,18 @@ async function sendVerificationCode(email, code, purpose = 'signup') {
   }
 
   const transport = getTransporter();
-  await transport.sendMail({
-    from: `"ProofStamp" <${from}>`,
-    to: email,
-    subject,
-    html,
-    text: `Your ProofStamp verification code is: ${code}\n\nExpires in 10 minutes.`,
-  });
+  try {
+    await transport.sendMail({
+      from: `"ProofStamp" <${from}>`,
+      to: email,
+      subject,
+      html,
+      text: `Your ProofStamp verification code is: ${code}\n\nExpires in 10 minutes.`,
+    });
+  } catch (err) {
+    console.error(`[Email Error] Failed to send to ${email}:`, err.message);
+    return { devMode: true, error: err.message, code };
+  }
 
   return { sent: true };
 }

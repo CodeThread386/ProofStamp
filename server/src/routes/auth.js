@@ -25,7 +25,8 @@ router.get(
     const user = req.user;
     const token = issueAuthToken(user);
     const needsSetup = user.passport?.username ? '0' : '1';
-    const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : '';
+    const defaultClientUrl = 'https://proof-stamp.vercel.app';
+    const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : defaultClientUrl;
     res.redirect(`${clientUrl}/auth/callback?needsSetup=${needsSetup}&token=${token}`);
   }
 );
@@ -65,7 +66,9 @@ router.get('/me', authMeLimiter, authMiddleware, async (req, res) => {
 });
 
 router.get('/failure', (req, res) => {
-  res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
+  const defaultClientUrl = 'https://proof-stamp.vercel.app';
+  const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : defaultClientUrl;
+  res.redirect(`${clientUrl}/login?error=auth_failed`);
 });
 
 module.exports = router;

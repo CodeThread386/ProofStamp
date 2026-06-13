@@ -60,12 +60,16 @@ router.post('/send-code', emailSendCodeLimiter, async (req, res) => {
       },
     });
 
-    await sendVerificationCode(email, code, purpose);
+    const emailResult = await sendVerificationCode(email, code, purpose);
+
+    if (emailResult.error) {
+      return res.status(500).json({ error: 'Email service unavailable: ' + emailResult.error });
+    }
 
     res.json({
       message: 'Verification code sent',
       expiresInMinutes: 10,
-      devHint: !isSmtpConfigured() ? 'SMTP not configured — check server logs for the code' : undefined,
+      devHint: !isSmtpConfigured() || emailResult.devMode ? 'SMTP not configured or failed — check server logs for the code' : undefined,
     });
   } catch (error) {
     console.error('Send code error:', error);

@@ -20,7 +20,10 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: process.env.NODE_ENV === 'production' || process.env.RENDER === 'true'
+        ? `${process.env.SERVER_URL || 'https://proofstamp-server.onrender.com'}/auth/google/callback`
+        : (process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'),
+      proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
