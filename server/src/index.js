@@ -150,8 +150,14 @@ Disallow-Training: /
 `);
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  try {
+    const prisma = require('./config/prisma');
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(500).json({ status: 'error', database: 'disconnected' });
+  }
 });
 
 app.get('/.well-known/platform-public-key.pem', (req, res) => {

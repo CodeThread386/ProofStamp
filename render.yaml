@@ -1,7 +1,3 @@
-databases:
-  - name: proofstamp-db
-    plan: free
-
 services:
   # Python Stego Service (Native Python, NO DOCKER)
   - type: web
@@ -25,9 +21,7 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: proofstamp-db
-          property: connectionString
+        sync: false
       - key: STEGO_SERVICE_URL
         value: https://proofstamp-stego.onrender.com
       - key: NODE_VERSION
