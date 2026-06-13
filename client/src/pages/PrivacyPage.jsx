@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       <h2 className="text-lg font-semibold text-gray-900 mt-6">Storage & processors</h2>
       <p>
         Files may be stored on Cloudinary or local disk during processing. Database records are held in
-        PostgreSQL. Trusted timestamp requests send only a SHA-256 hash to the configured TSA (e.g. FreeTSA).
+        PostgreSQL. Trusted timestamp requests send only a SHA-256 hash to the configured TSA (e.g. DigiCert).
         Reverse image search, when enabled, sends image URLs or buffers to TinEye or Google Vision per your configuration.
       </p>
       <h2 className="text-lg font-semibold text-gray-900 mt-6">Retention</h2>

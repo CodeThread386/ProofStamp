@@ -406,10 +406,13 @@ function VerificationResult({ result, onReset }) {
         </div>
       )}
 
-      <div className="text-center mt-8">
+      <div className="text-center mt-8 space-y-6">
         <button className="text-white/40 hover:text-white font-medium transition-colors" onClick={onReset}>
           Verify Another File
         </button>
+        <div className="flex justify-center pb-8">
+          <a href="//www.dmca.com/Protection/Status.aspx?ID=4812b976-9838-4138-bd63-76f1b1d4d300" title="DMCA.com Protection Status" className="dmca-badge opacity-70 hover:opacity-100 transition-opacity"> <img src ="https://images.dmca.com/Badges/dmca-badge-w100-2x1-04.png?ID=4812b976-9838-4138-bd63-76f1b1d4d300"  alt="DMCA.com Protection Status" /></a>
+        </div>
       </div>
     </div>
   );

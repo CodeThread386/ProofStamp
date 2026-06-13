@@ -98,7 +98,7 @@ const SYSTEM_ATTESTATION = {
   auditLogRetentionDays: parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '365', 10),
   privateKeyStorage: 'aes-256-gcm-encrypted-at-rest',
   disclaimer:
-    'Artifacts support admissibility-oriented evidence under Indian law when presented with counsel. They do not guarantee outcome or replace Copyright Office registration.',
+    'Artifacts provide cryptographic proof of prior possession and existence under Indian law. They do not establish automatic legal ownership, guarantee outcomes, or replace Copyright Office registration or Patent filing. Evidence must be presented alongside relevant contracts or source files to establish ownership.',
 };
 
 function isLegalProofEnabled() {

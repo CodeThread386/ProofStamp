@@ -15,7 +15,7 @@ export default function LegalEvidenceSummary({ stamp, verification }) {
   return (
     <ul className="text-xs space-y-1">
       <li>
-        {TSA_BADGES[tsaTier] || TSA_BADGES.development}
+        {TSA_BADGES[tsaTier] || TSA_BADGES.standard}
         {tsaStatus ? ` (${tsaStatus})` : ''}
       </li>
       <li>SHA-256: {stamp.originalHash?.substring(0, 24)}…</li>

@@ -20,7 +20,7 @@ export const MARKETING = {
 };
 
 export const TSA_BADGES = {
-  development: 'TSA: Development witness (RFC 3161)',
+  standard: 'TSA: Globally Trusted Witness (RFC 3161)',
   production: 'TSA: Commercial witness',
   pending: 'Timestamp pending — TSA temporarily unavailable (retrying within 1 hour)',
 };

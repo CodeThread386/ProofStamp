@@ -1,8 +1,13 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
 async function main() {
-  const passports = await prisma.passport.findMany({ include: { stamps: true } });
-  console.log("Passports:", JSON.stringify(passports, null, 2));
+  try {
+    const users = await prisma.user.findMany();
+    console.log("Users:", users);
+  } catch(e) {
+    console.error("DB Error:", e);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
-main().catch(console.error).finally(() => prisma.$disconnect());
+main();

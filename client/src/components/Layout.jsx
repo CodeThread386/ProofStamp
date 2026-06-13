@@ -114,12 +114,12 @@ export default function Layout({ children }) {
         <div className="flex flex-col items-stretch w-full gap-2">
           {user && (
             <>
-              <DesktopNavLink to="/dashboard" icon={Home} label="Home" />
+              <DesktopNavLink to="/dashboard" icon={Home} label="Dashboard" />
               <DesktopNavLink to="/verify" icon={Search} label="Verify" />
               <DesktopNavLink to="/stamp" icon={Lock} label="Protect" />
               <DesktopNavLink to="/monitor" icon={Radar} label="Monitor" />
               <DesktopNavLink to="/takedowns" icon={FileWarning} label="Takedowns" />
-              <DesktopNavLink to="/notifications" icon={Bell} label="Alerts" alertCount={unreadCount} />
+              <DesktopNavLink to="/notifications" icon={Bell} label="Notifications" alertCount={unreadCount} />
             </>
           )}
         </div>
@@ -172,12 +172,12 @@ export default function Layout({ children }) {
           </div>
           
           <div className="flex flex-col gap-2 overflow-y-auto pb-20 px-2">
-            <MobileNavLink to="/dashboard" icon={Home} label="Home" />
+            <MobileNavLink to="/dashboard" icon={Home} label="Dashboard" />
             <MobileNavLink to="/verify" icon={Search} label="Verify" />
             <MobileNavLink to="/stamp" icon={Lock} label="Protect" />
             <MobileNavLink to="/monitor" icon={Radar} label="Monitor" />
             <MobileNavLink to="/takedowns" icon={FileWarning} label="Takedowns" />
-            <MobileNavLink to="/notifications" icon={Bell} label="Alerts" alertCount={unreadCount} />
+            <MobileNavLink to="/notifications" icon={Bell} label="Notifications" alertCount={unreadCount} />
 
             <div className="h-px bg-white/10 my-4" />
 

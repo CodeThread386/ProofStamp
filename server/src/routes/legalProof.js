@@ -26,6 +26,7 @@ const {
   saveEvidencePdf,
 } = require('../services/legalEvidence');
 const { buildVerifyInstructions } = require('../utils/verifyInstructions');
+const { uploadEsignTemplate, createSignatureRequest } = require('../services/setuEsign');
 
 const router = express.Router();
 
@@ -390,6 +391,115 @@ router.get('/:stampId/litigation-pack', authOrApiKey, async (req, res) => {
   } catch (err) {
     console.error('Counsel packet error:', err);
     res.status(500).json({ error: 'Failed to build counsel evidence packet' });
+  }
+});
+
+router.post('/:stampId/setu-esign-template', authOrApiKey, async (req, res) => {
+  try {
+    if (!isLegalProofEnabled()) {
+      return res.status(503).json({ error: 'Legal proof features are disabled' });
+    }
+
+    const { documentType } = req.body || {};
+    const validDocs = ['system-certificate', 'creator-declaration'];
+    if (!validDocs.includes(documentType)) {
+      return res.status(400).json({ error: `documentType must be one of: ${validDocs.join(', ')}` });
+    }
+
+    const loaded = await loadStampForUser(req.params.stampId, req.user.userId);
+    if (loaded.error) return res.status(loaded.status).json({ error: loaded.error });
+
+    const { stamp, passport, user } = loaded;
+
+    let pdfBuffer;
+    let setuParams = {};
+
+    if (documentType === 'system-certificate') {
+      const auditExport = await exportAuditChain(stamp.id);
+      pdfBuffer = await generateSystem63Pdf(stamp, passport, user, {
+        auditHeadHash: auditExport.verification.headHash,
+      });
+      // System Certificate signature parameters (bottom of page roughly)
+      setuParams = {
+        signers: [{
+          id: "system_officer",
+          position: { x: 50, y: 150, page: 1 }
+        }]
+      };
+    } else if (documentType === 'creator-declaration') {
+      if (!hasCreatorAttestation(stamp)) {
+        return res.status(403).json({ error: 'Creator attestation required first' });
+      }
+      pdfBuffer = await generateCreatorDeclarationPdf(stamp, passport, user);
+      // Creator declaration signature parameters
+      setuParams = {
+        signers: [{
+          id: "creator",
+          position: { x: 50, y: 150, page: 1 }
+        }]
+      };
+    }
+
+    const setuResponse = await uploadEsignTemplate(pdfBuffer, setuParams);
+    
+    await logAudit(req, {
+      action: 'SETU_ESIGN_TEMPLATE_CREATED',
+      stampId: stamp.id,
+      passportId: passport.id,
+      userId: req.user.userId,
+      metadata: { documentType, setuTemplateId: setuResponse?.id || 'unknown' }
+    });
+
+    res.json({
+      success: true,
+      documentType,
+      setuResponse
+    });
+  } catch (err) {
+    console.error('Setu eSign template creation error:', err);
+    res.status(500).json({ error: 'Failed to create Setu eSign template' });
+  }
+});
+
+router.post('/:stampId/setu-esign-request', authOrApiKey, async (req, res) => {
+  try {
+    if (!isLegalProofEnabled()) {
+      return res.status(503).json({ error: 'Legal proof features are disabled' });
+    }
+
+    const { templateId, documentType } = req.body || {};
+    if (!templateId) return res.status(400).json({ error: 'templateId is required' });
+
+    const loaded = await loadStampForUser(req.params.stampId, req.user.userId);
+    if (loaded.error) return res.status(loaded.status).json({ error: loaded.error });
+
+    const { stamp, passport } = loaded;
+    
+    // Default signer details
+    const signerName = passport.ekycVerified ? passport.ekycName : passport.displayName;
+    const signers = [{ id: documentType === 'system-certificate' ? 'system_officer' : 'creator', name: signerName }];
+    
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const redirectUrl = `${clientUrl}/dashboard?esign=success&stampId=${stamp.id}`;
+
+    const sigRequest = await createSignatureRequest(templateId, `ProofStamp-${documentType}`, signers, redirectUrl);
+
+    await logAudit(req, {
+      action: 'SETU_ESIGN_REQUEST_CREATED',
+      stampId: stamp.id,
+      passportId: passport.id,
+      userId: req.user.userId,
+      metadata: { templateId, sigRequestId: sigRequest.id }
+    });
+
+    res.json({
+      success: true,
+      sigRequest,
+      signUrl: sigRequest.signers[0]?.url
+    });
+  } catch (err) {
+    console.error('Setu eSign request error:', err);
+    res.status(500).json({ error: 'Failed to create Setu eSign request' });
   }
 });
 

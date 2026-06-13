@@ -30,6 +30,10 @@ const notificationRoutes = require('./routes/notifications');
 const apiVerifyRoutes = require('./routes/apiVerify');
 const aiProtectionRoutes = require('./routes/aiProtection');
 const embedBadgeRoutes = require('./routes/embedBadge');
+const ekycRoutes = require('./routes/ekyc');
+const fairDealingOracleRoutes = require('./routes/fairDealingOracle');
+const multimodalRoutes = require('./routes/multimodal');
+const prampRoutes = require('./routes/pramp');
 const { logFairUseStartup } = require('./config/fairUse');
 const { startTsaRetryJob } = require('./jobs/tsaRetry');
 const { startWebhookRetryJob } = require('./jobs/webhookRetry');
@@ -102,6 +106,10 @@ app.use('/legal', legalProofRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/api/verify', apiVerifyRoutes);
 app.use('/api/ai-protection', aiProtectionRoutes);
+app.use('/api/ekyc', ekycRoutes);
+app.use('/api/fair-dealing', fairDealingOracleRoutes);
+app.use('/api/multimodal', multimodalRoutes);
+app.use('/api/pramp', prampRoutes);
 
 app.get('/ai.txt', (req, res) => {
   res.setHeader('Content-Type', 'text/plain');

@@ -48,16 +48,16 @@ export default function LandingPage() {
           </Link>
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-[10rem] font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-[0.9] drop-shadow-2xl">
-            Unbreakable <br />
+          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-[7rem] font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-[0.9] drop-shadow-2xl">
+            Create with confidence. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/50">
-              Evidence.
+              Defend with certainty.
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg sm:text-xl md:text-3xl text-white/50 max-w-4xl mx-auto leading-snug mb-10 md:mb-14 font-medium tracking-tight px-4 sm:px-0">
-            The world's first forensic platform built on C2PA provenance standards and Indian evidentiary law. Instantly generate court-admissible, zero-knowledge ownership evidence for your digital files in seconds.
+            Skip the legal friction. Automatically generate court-ready evidence and takedown packets for your digital work in seconds, so you can focus on creating.
           </p>
 
           {/* CTAs */}
@@ -86,8 +86,8 @@ export default function LandingPage() {
       <section className="py-20 md:py-40 relative z-10 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 md:mb-24 max-w-4xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-white mb-4 md:mb-6 leading-tight">Defensible proof.</h2>
-            <p className="text-lg sm:text-2xl text-white/50 font-medium tracking-tight leading-relaxed">From raw upload to a court-admissible evidence package in seconds. No crypto wallets required.</p>
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-white mb-4 md:mb-6 leading-tight">The end-to-end creator journey.</h2>
+            <p className="text-lg sm:text-2xl text-white/50 font-medium tracking-tight leading-relaxed">From raw upload to a court-admissible evidence package in seconds. No legal background required.</p>
           </div>
           
           <div className="grid lg:grid-cols-3 gap-8">
@@ -95,20 +95,20 @@ export default function LandingPage() {
               {
                 step: '01',
                 icon: Layers,
-                title: 'Upload & Hash',
-                desc: 'Client-side SHA-256 fingerprinting guarantees zero-knowledge. Your file never leaves your device unencrypted.',
+                title: 'Upload & Secure',
+                desc: 'Lock in your creation instantly. We secure your work privately—without ever viewing your files.',
               },
               {
                 step: '02',
                 icon: Shield,
-                title: 'Cryptographic Stamp',
-                desc: 'Your RSA signature is bound to an independent RFC 3161 timestamp and an invisible DWT-DCT watermark.',
+                title: 'Automated Legal Prep',
+                desc: 'Skip the lawyer fees. We automatically bind your verified identity to a court-admissible Section 63 certificate.',
               },
               {
                 step: '03',
                 icon: FileText,
-                title: 'Legal Admissibility',
-                desc: `Instantly download a ${BSA_FRAME.shortLabel} and ${MARKETING.counselPacketName} ready for DMCA takedowns.`,
+                title: 'Takedown Ready',
+                desc: `Enforce your rights effortlessly. Download pre-assembled ${MARKETING.counselPacketName}s ready for DMCA takedowns and litigation.`,
               },
             ].map((item) => (
               <div key={item.step} className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] apple-glass-panel apple-shadow relative group flex flex-col items-start text-left hover:-translate-y-2 transition-all duration-500">
@@ -142,15 +142,15 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-tight">Multi-layered forensic architecture.</h2>
-              <p className="text-lg sm:text-2xl text-white/50 mb-10 md:mb-16 font-medium tracking-tight leading-relaxed">We combine traditional cryptography, legal frameworks, and advanced steganography into one seamless engine.</p>
+              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-tight">Your end-to-end legal shield.</h2>
+              <p className="text-lg sm:text-2xl text-white/50 mb-10 md:mb-16 font-medium tracking-tight leading-relaxed">We bridge the gap between technical proof and courtroom readiness, automating the legal scaffolding you need to protect your work.</p>
               
               <div className="space-y-8 md:space-y-10">
                 {[
-                  { icon: Fingerprint, title: 'SHA-256 Hashing', desc: 'Immutable byte-level fingerprinting of your original file.' },
-                  { icon: Lock, title: 'RSA-2048 Signatures', desc: 'Cryptographically binds the file hash to your verified identity.' },
-                  { icon: Scale, title: 'RFC 3161 Timestamping', desc: 'Independent, mathematically verifiable time witness.' },
-                  { icon: Eye, title: 'DWT-DCT Watermarking', desc: 'Invisible, resilient watermarks embedded directly into image pixels.' },
+                  { icon: Fingerprint, title: 'Verified Authorship', desc: 'Bind your real-world identity to your digital creations permanently.' },
+                  { icon: Scale, title: 'Instant Affidavits', desc: 'Automatically generate legal documentation compliant with the BSA 2023.' },
+                  { icon: Eye, title: 'Invisible Protection', desc: 'Protect your visual assets without compromising aesthetics using imperceptible watermarks.' },
+                  { icon: Lock, title: 'Frictionless Enforcement', desc: 'Export everything your advocate needs with a single click.' },
                 ].map((item) => (
                   <div key={item.title} className="flex gap-4 md:gap-6 group">
                     <div className="mt-1 h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-[1rem] bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
@@ -173,14 +173,14 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16 md:mb-24">
             <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white">Why ProofStamp.</h2>
-            <p className="text-lg sm:text-2xl text-white/50 mt-4 md:mt-6 font-medium tracking-tight">Real legal infrastructure, zero crypto hype.</p>
+            <p className="text-lg sm:text-2xl text-white/50 mt-4 md:mt-6 font-medium tracking-tight">Comprehensive legal readiness, out of the box.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-8">
             {[
-              { vs: 'Blockchain & NFTs', win: 'No gas fees, no wallets. Private by default. Real legal evidence, not just a ledger entry.' },
-              { vs: '"Emailing Yourself"', win: 'Cryptographically secure RFC timestamps and RSA signatures. Emails are legally flimsy.' },
-              { vs: 'Visible Watermarks', win: 'Invisible DWT-DCT watermarks survive cropping, compression, and filters cleanly.' },
-              { vs: 'Copyright Office', win: 'Get instant evidence today. Register later when you need maximum statutory damages.' },
+              { vs: 'Basic Digital Signatures', win: 'A signature just proves who signed it. We provide an independent time-witness, invisible watermarks, and a complete legal evidence packet.' },
+              { vs: 'Standard Provenance Tools', win: 'Traditional tools only prove technical origin. We bridge the gap to litigation by providing the specific legal scaffolding required by courts.' },
+              { vs: '"Emailing Yourself"', win: 'Emails and simple cloud uploads are legally flimsy. We generate robust, cryptographically secure affidavits instantly.' },
+              { vs: 'Copyright Office', win: 'Get instant, automated cryptographic evidence today, without the bureaucratic delays, paperwork, or high filing fees.' },
             ].map((item) => (
                <div key={item.vs} className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] apple-glass-panel border border-white/10 hover:-translate-y-1 transition-transform duration-300">
                  <div className="flex items-center gap-3 md:gap-4 mb-5 md:mb-6">
@@ -228,20 +228,29 @@ export default function LandingPage() {
       {/* Ultra-minimal Footer */}
       <footer className="border-t border-white/[0.05] py-10 md:py-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-              <Shield className="h-4 w-4 text-white/60" />
+          <div className="flex flex-col gap-4 max-w-md">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-white/60" />
+              </div>
+              <span className="font-semibold tracking-tight text-white/60 text-lg">ProofStamp</span>
             </div>
-            <span className="font-semibold tracking-tight text-white/60 text-lg">ProofStamp</span>
+            <p className="text-xs text-white/40 leading-relaxed font-medium">
+              LEGAL DISCLAIMER: ProofStamp creates evidentiary records. It is not proof of legal ownership and does not substitute the orders and judgement of the court.
+            </p>
           </div>
-          <div className="flex flex-wrap justify-center gap-6 md:gap-10 text-base font-medium text-white/40">
-            <Link to="/verify" className="hover:text-white transition-colors">Verify</Link>
-            <Link to="/legal-guide" className="hover:text-white transition-colors">Legal Guide</Link>
-            {user ? (
-              <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-            ) : (
-              <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
-            )}
+          <div className="flex flex-col items-center md:items-end gap-6">
+            <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-10 text-base font-medium text-white/40">
+              <Link to="/verify" className="hover:text-white transition-colors">Verify</Link>
+              <Link to="/legal-guide" className="hover:text-white transition-colors">Legal Guide</Link>
+              <Link to="/data-retention" className="hover:text-white transition-colors">Data SLA</Link>
+              {user ? (
+                <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
+              ) : (
+                <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
+              )}
+            </div>
+            <a href="//www.dmca.com/Protection/Status.aspx?ID=4812b976-9838-4138-bd63-76f1b1d4d300" title="DMCA.com Protection Status" className="dmca-badge opacity-70 hover:opacity-100 transition-opacity"> <img src ="https://images.dmca.com/Badges/dmca-badge-w100-2x1-04.png?ID=4812b976-9838-4138-bd63-76f1b1d4d300"  alt="DMCA.com Protection Status" /></a>
           </div>
         </div>
       </footer>

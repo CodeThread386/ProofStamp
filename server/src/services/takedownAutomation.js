@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const dmcaApi = require('./dmcaApi');
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
@@ -149,14 +150,44 @@ async function sendDMCAEmail(takedown, toEmail, stamp) {
   }
 }
 
-/**
- * Auto-submit a takedown to platforms that support email-based submission.
- * @param {Object} takedown - Full takedown record
- * @param {Object} stamp - Associated stamp
- * @returns {Promise<{submitted: boolean, method: string, details: Object}>}
- */
 async function autoSubmitTakedown(takedown, stamp) {
   const platformConfig = PLATFORM_CONFIG[takedown.platform] || PLATFORM_CONFIG.other;
+  
+  const isDmca = takedown.dmcaLetter && takedown.dmcaLetter.includes('Digital Millennium Copyright Act');
+
+  if (isDmca) {
+    try {
+      const baseUrl = process.env.CLIENT_URL || 'https://proofstamp.app';
+      const dmcaData = {
+        subject: `DMCA Takedown Notice: ${stamp.title} [${stamp.id}]`,
+        description: takedown.dmcaLetter,
+        copiedFromUrl: `${baseUrl}/verify?id=${stamp.id}`,
+        infringingUrl: takedown.infringingUrl,
+        infringingSiteIp: '',
+      };
+      
+      const response = await dmcaApi.createCase(dmcaData);
+      
+      return {
+        submitted: true,
+        method: 'dmca_api',
+        details: {
+          messageId: response.d || 'dmca_filed',
+          message: 'Filed directly with official DMCA.com API',
+          rawResponse: response
+        },
+      };
+    } catch (err) {
+      return {
+        submitted: false,
+        method: 'dmca_api',
+        details: {
+          error: err.response?.data || err.message,
+          message: 'Failed to file with DMCA.com API'
+        }
+      };
+    }
+  }
 
   if (platformConfig.method === 'email' && platformConfig.abuseEmail) {
     const result = await sendDMCAEmail(takedown, platformConfig.abuseEmail, stamp);

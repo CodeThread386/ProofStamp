@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '@/lib/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,11 @@ export default function MonitorPage() {
   const [scanning, setScanning] = useState(null);
   const [wakingStego, setWakingStego] = useState(false);
   const [stamps, setStamps] = useState([]);
-  const [tab, setTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'overview';
+  const setTab = (newTab) => {
+    setSearchParams(prev => { prev.set('tab', newTab); return prev; });
+  };
   const [capabilities, setCapabilities] = useState(null);
 
   useEffect(() => {
@@ -254,20 +258,23 @@ export default function MonitorPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-full h-10 w-10 p-0"
+                        className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-full h-10 px-4 font-semibold"
                         onClick={() => runScan(monitor.stampId)}
                         disabled={scanning === monitor.stampId}
-                        title="Run Scan"
+                        id="start-scan-btn"
                       >
-                        {scanning === monitor.stampId ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanSearch className="h-4 w-4" />}
+                        {scanning === monitor.stampId ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ScanSearch className="h-4 w-4 mr-2" />}
+                        Scan
                       </Button>
                       {monitor.status === 'active' ? (
-                        <Button size="sm" variant="ghost" className="text-white/50 hover:text-white hover:bg-white/10 rounded-full h-10 w-10 p-0" onClick={() => disableMonitor(monitor.stampId)} title="Disable Monitor">
-                          <EyeOff className="h-4 w-4" />
+                        <Button size="sm" variant="ghost" className="text-white/50 hover:text-white hover:bg-white/10 rounded-full h-10 px-4 font-semibold" onClick={() => disableMonitor(monitor.stampId)}>
+                          <EyeOff className="h-4 w-4 mr-2" />
+                          Disable
                         </Button>
                       ) : (
-                        <Button size="sm" variant="ghost" className="text-white/50 hover:text-white hover:bg-white/10 rounded-full h-10 w-10 p-0" onClick={() => enableMonitor(monitor.stampId)} title="Enable Monitor">
-                          <Eye className="h-4 w-4" />
+                        <Button size="sm" variant="ghost" className="text-white/50 hover:text-white hover:bg-white/10 rounded-full h-10 px-4 font-semibold" onClick={() => enableMonitor(monitor.stampId)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Enable
                         </Button>
                       )}
                     </div>

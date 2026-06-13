@@ -71,7 +71,7 @@ export default function Login() {
         if (res.data.token) {
           localStorage.setItem('token', res.data.token);
         }
-        finishAuth(res.data.needsSetup);
+        await finishAuth(res.data.needsSetup);
         return;
       }
 
@@ -98,7 +98,7 @@ export default function Login() {
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
       }
-      finishAuth(res.data.needsSetup);
+      await finishAuth(res.data.needsSetup);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create account');
     } finally {

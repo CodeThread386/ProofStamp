@@ -3,14 +3,16 @@ import { useParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Download, FileJson, FileWarning, ShieldCheck, ExternalLink, Loader2, Info } from 'lucide-react';
+import { Copy, Download, FileJson, FileWarning, ShieldCheck, ExternalLink, Loader2, Info, BadgeCheck, FileSignature } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import { generateSetuTemplate, createSetuSignatureRequest } from '@/lib/legalProof';
 
 export default function ArtifactsPage() {
   const { stampId } = useParams();
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [setuLoading, setSetuLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -46,6 +48,28 @@ export default function ArtifactsPage() {
 
   const handleDownloadSystemCert = () => {
     window.open(`${import.meta.env.VITE_API_URL}/legal/${stampId}/system-certificate`, '_blank');
+  };
+
+  const handleGenerateSetuTemplate = async () => {
+    try {
+      setSetuLoading(true);
+      toast('Generating eSign Template...', 'info');
+      const res = await generateSetuTemplate(stampId, 'system-certificate');
+      if (res.success && res.setuResponse?.id) {
+        toast('Creating Signature Request...', 'info');
+        const sigRes = await createSetuSignatureRequest(stampId, res.setuResponse.id, 'system-certificate');
+        if (sigRes.success && sigRes.signUrl) {
+          toast('Redirecting to Setu Aadhaar eSign...', 'success');
+          window.location.href = sigRes.signUrl;
+        } else {
+          toast('Failed to get signature URL', 'error');
+        }
+      }
+    } catch (err) {
+      toast(err.message || 'Failed to generate Setu template', 'error');
+    } finally {
+      setSetuLoading(false);
+    }
   };
 
   if (loading) {
@@ -98,6 +122,9 @@ export default function ArtifactsPage() {
             </Button>
             <Button variant="outline" onClick={handleDownloadJson} className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl h-12 px-5">
               <FileJson className="h-4 w-4 mr-2" /> Download JSON
+            </Button>
+            <Button onClick={handleGenerateSetuTemplate} disabled={setuLoading} className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-12 px-5 shadow-lg shadow-amber-500/20 font-semibold border-0">
+              {setuLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSignature className="h-4 w-4 mr-2" />} Aadhaar eSign
             </Button>
             <Button onClick={handleDownloadSystemCert} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-12 px-5 shadow-lg shadow-indigo-500/20 font-semibold border-0">
               <Download className="h-4 w-4 mr-2" /> System Certificate
@@ -171,7 +198,15 @@ export default function ArtifactsPage() {
                 </div>
                 <div>
                   <p className="text-xs text-white/40 mb-1">Display Name</p>
-                  <p className="text-sm font-medium text-white">{data.creator.displayName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-white">{data.creator.displayName}</p>
+                    {data.claims?.find(c => c.claim === 'Government Identity Verification (eKYC)')?.available && (
+                      <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0 text-[10px] font-semibold">
+                        <BadgeCheck className="h-3 w-3 mr-1" />
+                        Aadhaar Verified
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs text-white/40 mb-1">Handle</p>

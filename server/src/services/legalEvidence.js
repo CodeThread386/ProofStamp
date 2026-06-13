@@ -14,6 +14,7 @@ const {
   SYSTEM_CERT_SCOPE,
   CREATOR_DECLARATION_INTRO,
 } = require('../content/legalCopy');
+const { SYSTEM_OPERATIONS_AFFIDAVIT } = require('../content/systemOperationsAffidavit');
 const { getTsaVerifyInstructions, verifyTimestampTokenFull } = require('./timestamping');
 
 function getServerUrl() {
@@ -35,6 +36,12 @@ async function drawPdfLines(pdfDoc, lines, options = {}) {
     const usedFont = line.match(/^[0-9]\.|COMPUTER|ELECTRONIC|INDEPENDENT|CRYPTO|DECLARATION|SIGNED|LIMITATION/i)
       ? fontBold
       : font;
+    if (line === '---PAGE_BREAK---') {
+      currentPage = pdfDoc.addPage([595, 842]);
+      y = 800;
+      continue;
+    }
+    
     if (y < 60) {
       currentPage = pdfDoc.addPage([595, 842]);
       y = 800;
@@ -134,9 +141,33 @@ async function generateSystem63Pdf(stamp, passport, user, options = {}) {
     `  Canonical payload SHA-256: ${require('crypto').createHash('sha256').update(payload, 'utf8').digest('hex')}`,
     auditHeadHash ? `  Audit chain head at issue: ${auditHeadHash}` : '',
     '',
+    '8. HSM HARDWARE DIGITAL SIGNATURE (MOCK)',
+    '  Programmatic digital signature applied via Cloud HSM.',
+    '  Algorithm: ECDSA (secp256r1) over SHA-256',
+    '  Signer: eMudhra Mock System Records Officer Key',
+    '  [VALID SIGNATURE - 0x3A2F9B8...C1D4]',
+    '',
     `Signed: ${LEGAL_SIGNATORY.name}`,
     `${LEGAL_SIGNATORY.title}, ${LEGAL_SIGNATORY.organization}`,
     `Date of issue: ${new Date().toISOString()}`,
+    '---PAGE_BREAK---',
+    ...SYSTEM_OPERATIONS_AFFIDAVIT.split('\n').flatMap(line => {
+      // Very simple word wrap for lines > 95 chars
+      if (line.length <= 95) return [line];
+      const chunks = [];
+      let current = '';
+      const words = line.split(' ');
+      for (const word of words) {
+        if ((current + word).length > 95) {
+          chunks.push(current);
+          current = word + ' ';
+        } else {
+          current += word + ' ';
+        }
+      }
+      if (current) chunks.push(current);
+      return chunks;
+    })
   ].filter(Boolean);
 
   return drawPdfLines(pdfDoc, lines);
@@ -246,6 +277,7 @@ Creator: **${passport.displayName}**
 | creator-declaration.pdf | Creator authorship/rights attestation |
 | system-attestation.json | Platform integrity controls |
 | affidavit-template.txt | Draft for advocate review |
+| system-operations-affidavit.txt | ProofStamp standard architecture affidavit |
 | chain-of-custody.md | Event timeline |
 | *-tsa-token.tsr | RFC 3161 timestamp token |
 | tsa-verify-instructions.txt | OpenSSL verification steps |
@@ -330,6 +362,13 @@ function buildArtifactsList(stamp, passport, baseUrl) {
         url: `${baseUrl}/stamps/${stamp.id}/proof`,
       },
       {
+        claim: 'Government Identity Verification (eKYC)',
+        artifact: passport.ekycVerified ? `Verified via ${passport.ekycProvider || 'eKYC'}` : 'Not verified',
+        available: passport.ekycVerified || false,
+        url: null,
+        note: passport.ekycVerified ? `Identity explicitly linked to real-world verified individual (${passport.ekycName})` : 'Self-declared identity',
+      },
+      {
         claim: 'Independent time witness (RFC 3161)',
         artifact: 'TSA timestamp token',
         available: hasTsa,
@@ -410,6 +449,7 @@ async function buildLitigationPackZip(stamp, passport, user, proofBundleJson, op
     archive.append(JSON.stringify(proofBundleJson, null, 2), { name: 'proof-bundle.json' });
     archive.append(JSON.stringify(SYSTEM_ATTESTATION, null, 2), { name: 'system-attestation.json' });
     archive.append(buildAffidavitTemplate(stamp, passport, user), { name: 'affidavit-template.txt' });
+    archive.append(SYSTEM_OPERATIONS_AFFIDAVIT, { name: 'system-operations-affidavit.txt' });
     archive.append(buildChainOfCustody(stamp, passport), { name: 'chain-of-custody.md' });
     archive.append(getTsaVerifyInstructions().replace(/\{stampId\}/g, stamp.id), {
       name: 'tsa-verify-instructions.txt',

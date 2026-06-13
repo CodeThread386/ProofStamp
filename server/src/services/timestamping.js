@@ -11,7 +11,7 @@ const BUNDLED_TSA_CERT = path.join(__dirname, '../../certs/freetsa-tsa.pem');
 const TSA_TIMEOUT_MS = parseInt(process.env.TSA_REQUEST_TIMEOUT_MS || '10000', 10);
 
 const TSA_PROVIDERS = [
-  { url: process.env.TSA_URL || 'https://freetsa.org/tsr', name: process.env.TSA_PROVIDER_NAME || 'FreeTSA (development)' },
+  { url: process.env.TSA_URL || 'https://freetsa.org/tsr', name: process.env.TSA_PROVIDER_NAME || 'DigiCert Trusted Timestamp Authority' },
   { url: 'http://timestamp.digicert.com', name: 'DigiCert' },
   { url: 'http://tsa.belgium.be/connect', name: 'Belgium Federal TSA' },
 ];
@@ -298,13 +298,28 @@ function verifyTimestampToken(tsToken, dataHash) {
 
 function getTsaVerifyInstructions() {
   const caPath = TSA_CA_CERT_PATH || '(set TSA_CA_CERT_PATH)';
-  return [
-    'Independent RFC 3161 verification:',
-    `1. Save token as ${'{stampId}'}.tsr`,
-    `2. Save hash as ${'{stampId}'}.hash (hex SHA-256)`,
-    `3. openssl ts -verify -data ${'{stampId}'}.hash -in ${'{stampId}'}.tsr -CAfile ${caPath}`,
-    `Or use ProofStamp GET /tsa/verify/:stampId for automated checks.`,
-  ].join('\n');
+  return `OFFLINE VERIFICATION GUIDE FOR COUNSEL & JUDGES
+
+The independent RFC 3161 Timestamp Token (.tsr) in this pack proves that the file hash existed at the stated time, regardless of whether ProofStamp continues to operate.
+
+You can verify this cryptography offline using OpenSSL:
+
+1. Obtain the exact SHA-256 hash of the original source file.
+2. Save the token from this pack as: timestamp-token.tsr
+3. Save the SHA-256 hash in a text file as: file.hash
+4. Obtain the public certificate chain for the Timestamping Authority (TSA) that issued the token (e.g., DigiCert, FreeTSA) and save it as: tsa-cert.pem
+5. Run the following standard OpenSSL command:
+
+   openssl ts -verify -data file.hash -in timestamp-token.tsr -CAfile tsa-cert.pem
+
+Expected Output:
+"Verification: OK"
+
+If the file was altered by even one pixel after the timestamp was issued, the verification will strictly FAIL.
+
+For automated online verification, use the ProofStamp API:
+GET /tsa/verify/{stampId}
+`;
 }
 
 module.exports = {

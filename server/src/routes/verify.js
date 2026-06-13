@@ -285,6 +285,56 @@ router.post('/file', upload.single('file'), async (req, res) => {
   }
 });
 
+router.get('/hash/:hash', async (req, res) => {
+  try {
+    const { hash } = req.params;
+    if (!hash || hash.length !== 64) {
+      return res.status(400).json({ error: 'Invalid SHA-256 hash' });
+    }
+
+    const exactMatch = await prisma.stamp.findFirst({
+      where: {
+        OR: [
+          { originalHash: hash },
+          { stampedHash: hash },
+        ],
+      },
+      include: {
+        passport: {
+          include: { user: { select: { avatarUrl: true } } },
+        },
+      },
+    });
+
+    if (exactMatch) {
+      const sigResult = verifyStampSignature(exactMatch, exactMatch.passport);
+      const chainResult = verifyProofChain(exactMatch);
+
+      return res.json({
+        outcome: 'A',
+        message: 'This file is authentic and verified (exact cryptographic match)',
+        stamp: { ...exactMatch, passport: undefined },
+        passport: stripPrivateKey(exactMatch.passport),
+        confidence: 'exact',
+        verification: {
+          signatureValid: sigResult.verified,
+          proofChainValid: chainResult.valid,
+        },
+      });
+    }
+
+    return res.json({
+      outcome: 'C',
+      message: 'No ProofStamp found for this cryptographic hash',
+      stamp: null,
+      passport: null,
+    });
+  } catch (error) {
+    console.error('Error verifying hash:', error);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
 router.get('/:stampId', async (req, res) => {
   try {
     if (!isValidStampId(req.params.stampId)) {

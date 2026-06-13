@@ -46,6 +46,29 @@ export async function attestCreator(stampId, { fullName, city, country }) {
   }
 }
 
+export async function generateSetuTemplate(stampId, documentType) {
+  try {
+    const res = await api.post(`/legal/${stampId}/setu-esign-template`, {
+      documentType,
+    });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.error || err.response?.data?.message || 'Failed to generate Setu eSign template');
+  }
+}
+
+export async function createSetuSignatureRequest(stampId, templateId, documentType) {
+  try {
+    const res = await api.post(`/legal/${stampId}/setu-esign-request`, {
+      templateId,
+      documentType,
+    });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.error || 'Failed to create Setu signature request');
+  }
+}
+
 export function legalStatusBadges(stamp) {
   const badges = [];
   const tier = stamp.tsaTier || 'development';

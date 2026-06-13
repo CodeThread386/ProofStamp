@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import {
   Upload, FileImage, Loader2, CheckCircle2, Copy, Download, ExternalLink,
-  File, Music, Video, Code, Package, Type, Scale, Radar
+  File, Music, Video, Code, Package, Type, Scale, Radar, FileWarning
 } from 'lucide-react';
 import { MARKETING, TSA_BADGES, BSA_FRAME } from '@/content/legalCopy';
 import { CREATOR_ATTESTATION_STATEMENT } from '@/content/legalCopy';
@@ -721,6 +721,20 @@ export default function StampPage() {
               {error}
             </div>
           )}
+
+          {mode === 'single' && (() => {
+            const txt = `${title} ${description} ${files[0]?.name || ''}`.toLowerCase();
+            const showWarning = ['patent', 'invention', 'algorithm', 'r&d', 'research'].some(w => txt.includes(w));
+            if (!showWarning) return null;
+            return (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+                <Scale className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-amber-200/90 leading-relaxed">
+                  <strong>Patent Notice:</strong> ProofStamp establishes a verifiable timestamp of your R&D, which is excellent for trade secrets and defensive prior art. However, it does not grant patent rights. If you intend to monopolize this invention, you must file a Provisional Specification with the Patent Office.
+                </p>
+              </div>
+            );
+          })()}
 
           <Button
             type="submit"

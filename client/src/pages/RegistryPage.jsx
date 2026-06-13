@@ -197,7 +197,7 @@ export default function RegistryPage() {
             <ShieldAlert className="h-4 w-4" />
             <Link to="/" className="text-white/70 hover:text-white font-semibold transition-colors">ProofStamp</Link> 
             <span>—</span>
-            <span>Cryptographic proof of creative ownership</span>
+            <span>Cryptographic proof of prior possession</span>
           </p>
         </div>
       </div>

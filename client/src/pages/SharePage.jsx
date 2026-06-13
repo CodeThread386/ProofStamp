@@ -452,12 +452,15 @@ export default function SharePage() {
           </div>
         </div>
 
-        <div className="text-center mt-10 text-sm font-medium text-white/30">
+        <div className="text-center mt-10 text-sm font-medium text-white/30 space-y-6 pb-10">
           <p>
             Protected with <Shield className="h-4 w-4 inline text-indigo-400 mx-1" />{' '}
             <Link to="/" className="text-white hover:text-indigo-300 transition-colors">ProofStamp</Link>
-            {' '}— Cryptographic proof of creative ownership
+            {' '}— Cryptographic proof of prior possession
           </p>
+          <div className="flex justify-center">
+            <a href="//www.dmca.com/Protection/Status.aspx?ID=4812b976-9838-4138-bd63-76f1b1d4d300" title="DMCA.com Protection Status" className="dmca-badge opacity-70 hover:opacity-100 transition-opacity"> <img src ="https://images.dmca.com/Badges/dmca-badge-w100-2x1-04.png?ID=4812b976-9838-4138-bd63-76f1b1d4d300"  alt="DMCA.com Protection Status" /></a>
+          </div>
         </div>
       </div>
     </Layout>

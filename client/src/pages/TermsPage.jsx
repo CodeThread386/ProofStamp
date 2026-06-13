@@ -17,9 +17,9 @@ export default function TermsPage() {
       </p>
       <h2 className="text-lg font-semibold text-gray-900 mt-6">No guarantee of outcome</h2>
       <p>
-        Evidence packages are technical artifacts. Courts, platforms, and opposing parties make
+        Evidence packages are technical artifacts that prove prior possession and existence. Courts, platforms, and opposing parties make
         their own decisions. We do not guarantee admissibility, takedown success, or ownership
-        disputes resolved in your favor.
+        disputes resolved in your favor. ProofStamp is not a substitute for official Copyright registration or Patent filing.
       </p>
       <h2 className="text-lg font-semibold text-gray-900 mt-6">Your responsibilities</h2>
       <ul className="list-disc pl-6 space-y-2">

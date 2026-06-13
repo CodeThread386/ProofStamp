@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   FileCheck, Plus, Calendar, Shield, FileImage, Music, Video,
-  Code, File, Package, Type, Lock, Download, Trash2, AlertTriangle, Scale, Loader2
+  Code, File, Package, Type, Lock, Download, Trash2, AlertTriangle, Scale, Loader2, BadgeCheck
 } from 'lucide-react';
 import { downloadCounselPacket, legalStatusBadges, MARKETING } from '@/lib/legalProof';
 import { useToast } from '@/components/ui/toast';
@@ -99,8 +99,13 @@ export default function Dashboard() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-2">
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-2 flex items-center gap-3">
               Your Protected Assets
+              {passport?.ekycVerified && (
+                <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-sm py-1 px-3">
+                  <BadgeCheck className="h-4 w-4 mr-1.5" /> Verified Identity
+                </Badge>
+              )}
             </h1>
             <p className="text-white/50 text-base md:text-lg font-medium">
               Manage and monitor your cryptographically secured files.
@@ -125,6 +130,29 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
+
+        {/* eKYC Banner */}
+        {!loading && !passport?.ekycVerified && (
+          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 apple-shadow">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 border border-indigo-500/30">
+                <Shield className="h-6 w-6 text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white mb-1">Upgrade to Verified Identity (eKYC)</h3>
+                <p className="text-white/70 text-sm max-w-2xl leading-relaxed">
+                  Connect your Aadhaar to officially link your real-world identity to your cryptographic stamps. This ensures your Evidence Packets carry maximum legal weight under the BSA 2023.
+                </p>
+              </div>
+            </div>
+            <Button asChild className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-full px-6 h-12 whitespace-nowrap shadow-lg shadow-indigo-500/25 shrink-0">
+              <a href={`${import.meta.env.VITE_API_URL}/api/ekyc/setu/auth?token=${localStorage.getItem('token')}`}>
+                <BadgeCheck className="h-5 w-5 mr-2" />
+                Verify Identity (Aadhaar)
+              </a>
+            </Button>
+          </div>
+        )}
 
         {/* Stats Row */}
         {stamps.length > 0 && (

@@ -17,7 +17,7 @@ function getServerUrl() {
   return process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3001}`;
 }
 
-function generateLegalNotice(stamp, passport, infringingUrl, platform, type = 'copyright') {
+function generateLegalNotice(stamp, passport, infringingUrl, platform, type = 'copyright', jurisdiction = 'it_rules') {
   const baseUrl = getServerUrl();
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -29,6 +29,14 @@ function generateLegalNotice(stamp, passport, infringingUrl, platform, type = 'c
     : `- ${BSA_FRAME.shortLabel}: ${baseUrl}/legal/${stamp.id}/system-certificate`;
 
   if (type === 'deepfake') {
+    const mandateText = jurisdiction === 'dmca' 
+      ? `Under the Digital Millennium Copyright Act (17 U.S.C. § 512), you are legally mandated to take all reasonable and practicable measures to remove or disable access to this content upon receiving this complaint.`
+      : `Under Rule 3(2)(b) of the Information Technology (Intermediary Guidelines) Rules, 2021, you are legally mandated to take all reasonable and practicable measures to remove or disable access to this content within 24 hours of receiving this complaint.`;
+
+    const lawMention = jurisdiction === 'dmca'
+      ? `Remove the manipulated material at ${infringingUrl} immediately to comply with US law (DMCA).`
+      : `Remove the manipulated material at ${infringingUrl} immediately to comply with Indian law.`;
+
     return `I, ${passport.displayName} (@${passport.username}), am the individual depicted in the original image/content described below. I am writing to notify you that the content hosted at the URL below is a digitally manipulated, non-consensual deepfake or impersonation of my likeness.
 
 ORIGINAL VERIFIED IDENTITY RECORD:
@@ -46,17 +54,25 @@ This original image was registered with ProofStamp. The uploaded material on you
 ${tsaLine}
 ${s63Line}
 
-STATUTORY MANDATE (INDIA):
-Under Rule 3(2)(b) of the Information Technology (Intermediary Guidelines) Rules, 2021, you are legally mandated to take all reasonable and practicable measures to remove or disable access to this content within 24 hours of receiving this complaint.
+STATUTORY MANDATE:
+${mandateText}
 
 REQUESTED ACTION:
-Remove the manipulated material at ${infringingUrl} immediately to comply with Indian law.
+${lawMention}
 
 Contact Information:
 Name: ${passport.displayName}
 ProofStamp ID: ${passport.id}
 Username: @${passport.username}`;
   }
+
+  const actionText = jurisdiction === 'dmca' 
+    ? `Under the Digital Millennium Copyright Act (17 U.S.C. § 512), please remove or disable access to the infringing material immediately.`
+    : `Under Rule 3(1)(b) of the IT Rules 2021, please remove or disable access to the infringing material immediately.`;
+  
+  const lawText = jurisdiction === 'dmca'
+    ? `This notice is sent pursuant to the Digital Millennium Copyright Act (17 U.S.C. § 512).`
+    : `This notice is sent pursuant to the Information Technology Rules, 2021.`;
 
   return `I, ${passport.displayName} (@${passport.username}), am the exclusive rights holder of the copyrighted work described below. I am writing to notify you of an infringement of my copyright.
 
@@ -81,13 +97,13 @@ ${tsaLine}
 ${s63Line}
 
 REQUESTED ACTION:
-Under Rule 3(1)(b) of the IT Rules 2021 and the DMCA, please remove or disable access to the infringing material immediately.
+${actionText}
 
 Contact Information:
 Name: ${passport.displayName}
 ProofStamp ID: ${passport.id}
 
-This notice is sent pursuant to the Information Technology Rules, 2021 and the Digital Millennium Copyright Act (17 U.S.C. § 512).`;
+${lawText}`;
 }
 
 router.get('/', authMiddleware, async (req, res) => {
@@ -125,7 +141,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { stampId, infringingUrl, platform, alertId, autoSubmit, type = 'copyright' } = req.body;
+    const { stampId, infringingUrl, platform, alertId, autoSubmit, type = 'copyright', jurisdiction = 'it_rules' } = req.body;
 
     if (!stampId || !infringingUrl || !platform) {
       return res.status(400).json({ error: 'stampId, infringingUrl, and platform are required' });
@@ -139,7 +155,7 @@ router.post('/', authMiddleware, async (req, res) => {
     if (stamp.passportId !== passport.id) return res.status(403).json({ error: 'Not your stamp' });
 
     const platformConfig = getPlatformConfig(platform);
-    const dmcaLetter = generateLegalNotice(stamp, passport, infringingUrl, platformConfig.name, type);
+    const dmcaLetter = generateLegalNotice(stamp, passport, infringingUrl, platformConfig.name, type, jurisdiction);
 
     let finalAlertId = alertId || null;
     if (finalAlertId) {
@@ -240,6 +256,55 @@ router.post('/:takedownId/submit', authMiddleware, async (req, res) => {
   }
 });
 
+router.post('/:takedownId/cancel', authMiddleware, async (req, res) => {
+  try {
+    const passport = await prisma.passport.findUnique({ where: { userId: req.user.userId } });
+    const takedown = await prisma.takedown.findUnique({
+      where: { id: req.params.takedownId },
+      include: { stamp: true },
+    });
+
+    if (!takedown) return res.status(404).json({ error: 'Takedown not found' });
+    if (takedown.passportId !== passport.id) return res.status(403).json({ error: 'Not authorized' });
+
+    if (takedown.externalTicketId) {
+      // It's a DMCA API case
+      const dmcaApi = require('../services/dmcaApi');
+      const baseUrl = process.env.CLIENT_URL || 'https://proofstamp.app';
+      
+      try {
+        await dmcaApi.updateCase({
+          case_id: takedown.externalTicketId,
+          status: 'Cancelled',
+          subject: `CANCELLED: DMCA Takedown Notice: ${takedown.stamp.title} [${takedown.stamp.id}]`,
+          description: 'This takedown request is officially cancelled by the rights holder.',
+          copiedFromUrl: `${baseUrl}/verify?id=${takedown.stamp.id}`,
+          infringingUrl: takedown.infringingUrl,
+          infringingSiteIp: '',
+          priority: 'Normal'
+        });
+      } catch (err) {
+        console.error('DMCA API cancel error:', err.response?.data || err.message);
+        return res.status(500).json({ error: 'Failed to cancel case on DMCA.com' });
+      }
+    }
+
+    const updated = await prisma.takedown.update({
+      where: { id: takedown.id },
+      data: {
+        status: 'rejected',
+        resolution: 'cancelled by user',
+        resolvedAt: new Date()
+      },
+    });
+
+    res.json({ takedown: updated });
+  } catch (error) {
+    console.error('Error cancelling takedown:', error);
+    res.status(500).json({ error: 'Failed to cancel takedown' });
+  }
+});
+
 router.patch('/:takedownId/status', authMiddleware, async (req, res) => {
   try {
     const { status, notes, externalTicketId } = req.body;
@@ -293,6 +358,41 @@ router.patch('/:takedownId/status', authMiddleware, async (req, res) => {
 
 router.get('/platforms', (req, res) => {
   res.json({ platforms: getAllPlatforms() });
+});
+
+router.get('/:takedownId/pdf', authMiddleware, async (req, res) => {
+  try {
+    const passport = await prisma.passport.findUnique({ where: { userId: req.user.userId } });
+    const takedown = await prisma.takedown.findUnique({
+      where: { id: req.params.takedownId },
+      include: { stamp: true },
+    });
+
+    if (!takedown) return res.status(404).json({ error: 'Takedown not found' });
+    if (takedown.passportId !== passport.id) return res.status(403).json({ error: 'Not authorized' });
+
+    const { generateLegalNoticePdf } = require('../utils/legalNoticeGenerator');
+    
+    const isIndianJurisdiction = !takedown.dmcaLetter || !takedown.dmcaLetter.includes('Digital Millennium Copyright Act');
+    
+    const pdfBuffer = await generateLegalNoticePdf({
+      creatorName: passport.displayName,
+      creatorEmail: req.user.email || 'Verified ProofStamp User',
+      stampId: takedown.stampId,
+      originalTitle: takedown.stamp.title,
+      infringingUrl: takedown.infringingUrl,
+      platformName: takedown.platform,
+      isIndianJurisdiction: isIndianJurisdiction,
+      signatureBase64: passport.ekycVerified ? 'verified' : null
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=takedown_notice_${takedown.id}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error generating takedown PDF:', error);
+    res.status(500).json({ error: 'Failed to generate PDF' });
+  }
 });
 
 // Start the escalation monitoring job

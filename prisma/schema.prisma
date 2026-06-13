@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../server/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -41,6 +42,10 @@ model Passport {
   privateKey       String
   createdAt        DateTime          @default(now())
   webhookUrl       String?
+  ekycVerified     Boolean           @default(false)
+  ekycProvider     String?
+  ekycName         String?
+  ekycId           String?
   apiKeys          ApiKey[]
   monitors         Monitor[]
   user             User              @relation(fields: [userId], references: [id])
@@ -108,6 +113,10 @@ model Stamp {
   creatorAttestationCity      String?
   creatorAttestationCountry   String?
   tsaStatus                   String?        @default("pending")
+  expertSignature             String?
+  expertSignatureDate         DateTime?
+  expertName                  String?
+  expertId                    String?
   processing                  Boolean        @default(true)
   monitors                    Monitor[]
   alerts                      MonitorAlert[]

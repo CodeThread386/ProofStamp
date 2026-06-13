@@ -184,7 +184,7 @@ export default function SettingsPage() {
               </div>
               <p className="text-xs text-white/40 mt-2 font-medium">This determines your public passport URL.</p>
             </div>
-            <Button type="submit" disabled={savingProfile} className="bg-white text-black hover:bg-white/90 rounded-full font-semibold px-8 h-12">
+            <Button id="save-profile-btn" type="submit" disabled={savingProfile} className="bg-white text-black hover:bg-white/90 rounded-full font-semibold px-8 h-12">
               {savingProfile ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Save Changes
             </Button>
@@ -230,6 +230,7 @@ export default function SettingsPage() {
 
             {!showDeleteConfirm ? (
               <Button 
+                id="delete-account-btn"
                 variant="destructive" 
                 className="bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold px-8 h-12 shadow-lg"
                 onClick={() => setShowDeleteConfirm(true)}

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
   FileWarning, Send, Copy, CheckCircle2, Clock, XCircle,
-  Loader2, ExternalLink, ChevronDown, ChevronUp
+  Loader2, ExternalLink, ChevronDown, ChevronUp, Scale
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -37,6 +37,10 @@ export default function TakedownPage() {
   const [formPlatform, setFormPlatform] = useState('');
   const [formAlertId] = useState(searchParams.get('alertId') || '');
   const [formType, setFormType] = useState('copyright');
+  const formJurisdiction = searchParams.get('jurisdiction') || 'it_rules';
+  const setFormJurisdiction = (newJ) => {
+    setSearchParams(prev => { prev.set('jurisdiction', newJ); return prev; });
+  };
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -73,6 +77,7 @@ export default function TakedownPage() {
         platform: formPlatform,
         alertId: formAlertId || undefined,
         type: formType,
+        jurisdiction: formJurisdiction,
       });
       setTakedowns(prev => [res.data.takedown, ...prev]);
       setExpanded(res.data.takedown.id);
@@ -96,23 +101,60 @@ export default function TakedownPage() {
     }
   }
 
-  const handleDispatch = (td) => {
-    updateStatus(td.id, 'sent');
+  const handleDispatch = async (td) => {
+    try {
+      const res = await api.post(`/takedowns/${td.id}/submit`);
+      
+      setTakedowns(prev => prev.map(t => t.id === td.id ? res.data.takedown : t));
+      
+      const { submissionResult } = res.data;
+      if (submissionResult.method === 'dmca_api') {
+        if (submissionResult.submitted) {
+          toast('Takedown officially filed via DMCA.com API', 'success');
+        } else {
+          toast(submissionResult.details?.message || 'Failed to file via DMCA.com', 'error');
+        }
+      } else if (submissionResult.method === 'email') {
+        toast('Takedown dispatched via automated email', 'success');
+      } else {
+        toast('Takedown requires manual submission', 'default');
+        if (submissionResult.details?.reportUrl) {
+          window.open(submissionResult.details.reportUrl, '_blank');
+        }
+      }
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to dispatch takedown', 'error');
+    }
+  };
+
+  const handleEmailLawyer = (td) => {
+    updateStatus(td.id, 'acknowledged');
     
     const subjectTitle = td.stamp?.title || 'Takedown Request';
-    const isDeepfake = td.dmcaLetter?.includes('DEEPFAKE') || td.dmcaLetter?.includes('Rule 3(2)(b)');
+    const isDeepfake = td.dmcaLetter?.toLowerCase().includes('deepfake');
     const subjectPrefix = isDeepfake 
       ? 'URGENT: STATUTORY GRIEVANCE NOTICE — DEEPFAKE' 
       : 'DMCA & IT RULES 2021 TAKEDOWN NOTICE';
     const subject = `${subjectPrefix} - ${subjectTitle}`;
     
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    const attachmentsText = `\n\n--- ENCLOSED ATTACHMENTS ---\n1. BSA Section 63 Digital Evidence Certificate: ${apiUrl}/legal/${td.stampId}/system-certificate\n2. Legal Litigation Packet (Zip): ${apiUrl}/legal/${td.stampId}/litigation-pack\n\nPlease download and review the enclosed digital evidence for cryptographically signed proof of ownership.`;
+    const attachmentsText = `\n\n--- ENCLOSED ATTACHMENTS ---\n1. BSA Section 63 Digital Evidence Certificate: ${apiUrl}/legal/${td.stampId}/system-certificate\n2. Legal Litigation Packet (Zip): ${apiUrl}/legal/${td.stampId}/litigation-pack\n3. Generated Notice PDF: ${apiUrl}/takedowns/${td.id}/pdf\n\nPlease download and review the enclosed digital evidence for cryptographically signed proof of ownership.`;
     
     const bodyText = (td.dmcaLetter || '') + attachmentsText;
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
     window.open(gmailUrl, '_blank');
+  };
+
+  const handleCancel = async (td) => {
+    if (!window.confirm('Are you sure you want to cancel this takedown request?')) return;
+    try {
+      const res = await api.post(`/takedowns/${td.id}/cancel`);
+      setTakedowns(prev => prev.map(t => t.id === td.id ? res.data.takedown : t));
+      toast('Takedown cancelled successfully', 'success');
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to cancel takedown', 'error');
+    }
   };
 
   function copyText(text, id) {
@@ -204,7 +246,27 @@ export default function TakedownPage() {
         {showForm && (
           <div className="apple-glass-panel border border-red-500/20 bg-red-500/5 rounded-[2.5rem] overflow-hidden apple-shadow mb-8">
             <div className="p-8 sm:p-10">
-              <h2 className="text-2xl font-semibold text-white tracking-tight mb-8">File a Statutory IT Rules Notice</h2>
+              <div className="flex gap-6 border-b border-white/10 pb-4 mb-8">
+                <button
+                  type="button"
+                  className={`pb-4 px-2 font-semibold transition-colors relative ${formJurisdiction === 'it_rules' ? 'text-red-400' : 'text-white/50 hover:text-white/80'}`}
+                  onClick={() => setFormJurisdiction('it_rules')}
+                >
+                  IT Rules Notice (India)
+                  {formJurisdiction === 'it_rules' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-400 rounded-full" />}
+                </button>
+                <button
+                  type="button"
+                  className={`pb-4 px-2 font-semibold transition-colors relative ${formJurisdiction === 'dmca' ? 'text-red-400' : 'text-white/50 hover:text-white/80'}`}
+                  onClick={() => setFormJurisdiction('dmca')}
+                >
+                  DMCA Takedown (Global)
+                  {formJurisdiction === 'dmca' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-400 rounded-full" />}
+                </button>
+              </div>
+              <h2 className="text-2xl font-semibold text-white tracking-tight mb-8">
+                {formJurisdiction === 'it_rules' ? 'File a Statutory IT Rules Notice' : 'File a DMCA Takedown Notice'}
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
@@ -264,7 +326,7 @@ export default function TakedownPage() {
                 </div>
                 <Button type="submit" disabled={submitting} className="w-full h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-lg shadow-xl">
                   {submitting ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <FileWarning className="h-5 w-5 mr-2" />}
-                  Generate Statutory Legal Notice
+                  {formJurisdiction === 'it_rules' ? 'Generate Statutory Legal Notice' : 'Generate DMCA Takedown Notice'}
                 </Button>
               </form>
             </div>
@@ -306,15 +368,16 @@ export default function TakedownPage() {
                           <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase border ${statusConf?.color}`}>
                             {statusConf?.label}
                           </div>
-                          {td.dmcaLetter?.includes('DEEPFAKE') && (
+                          {td.dmcaLetter?.toLowerCase().includes('deepfake') && (
                             <div className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase border bg-red-500/20 text-red-300 border-red-500/30">
-                              DEEPFAKE (24HR MANDATE)
+                              DEEPFAKE
                             </div>
                           )}
                         </div>
                         <p className="text-sm text-blue-400 hover:text-blue-300 truncate font-medium max-w-lg mb-1">{td.infringingUrl}</p>
                         <p className="text-xs font-medium text-white/30">
                           {td.platform} · {new Date(td.createdAt).toLocaleDateString()}
+                          {td.externalTicketId && ` · DMCA Case ID: ${td.externalTicketId}`}
                         </p>
                       </div>
                       {isExpanded ? <ChevronUp className="h-6 w-6 text-white/30" /> : <ChevronDown className="h-6 w-6 text-white/30" />}
@@ -343,23 +406,37 @@ export default function TakedownPage() {
 
                           {/* Platform link */}
                           {platforms[td.platform] && (
-                            <div className="flex items-center gap-4 p-5 bg-blue-500/10 rounded-[1.5rem] border border-blue-500/20">
-                              <div className="flex-1">
-                                <p className="text-sm font-semibold text-blue-300">
-                                  Resident Grievance Officer ({platforms[td.platform]?.name})
-                                </p>
-                                <p className="text-xs font-medium text-blue-400/80 mt-1">
-                                  Method: Email Dispatch / Form
-                                </p>
-                              </div>
-                              {platforms[td.platform]?.reportUrl && (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium shadow-lg" asChild>
-                                  <a href={platforms[td.platform].reportUrl} target="_blank" rel="noreferrer">
-                                    <ExternalLink className="h-4 w-4 mr-1.5" /> Open Platform Form
-                                  </a>
-                                </Button>
+                            <>
+                              {td.dmcaLetter?.includes('Digital Millennium Copyright Act') ? (
+                                <div className="flex items-center gap-4 p-5 bg-blue-500/10 rounded-[1.5rem] border border-blue-500/20">
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-blue-300">
+                                      DMCA.com Global Agent
+                                    </p>
+                                    <p className="text-xs font-medium text-blue-400/80 mt-1">
+                                      Method: DMCA.com Official API
+                                    </p>
+                                  </div>
+                                  {platforms[td.platform]?.reportUrl && (
+                                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium shadow-lg" asChild>
+                                      <a href={platforms[td.platform].reportUrl} target="_blank" rel="noreferrer">
+                                        <ExternalLink className="h-4 w-4 mr-1.5" /> Open Platform Form
+                                      </a>
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                platforms[td.platform]?.reportUrl && (
+                                  <div className="mb-4">
+                                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium shadow-lg" asChild>
+                                      <a href={platforms[td.platform].reportUrl} target="_blank" rel="noreferrer">
+                                        <ExternalLink className="h-4 w-4 mr-1.5" /> Open Platform Form
+                                      </a>
+                                    </Button>
+                                  </div>
+                                )
                               )}
-                            </div>
+                            </>
                           )}
 
                           {/* Countdown Timer for active deepfakes */}
@@ -378,9 +455,16 @@ export default function TakedownPage() {
                           {/* Status actions */}
                           <div className="flex gap-3 flex-wrap">
                             {td.status === 'draft' && (
-                              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold shadow-lg" onClick={() => handleDispatch(td)}>
-                                <Send className="h-4 w-4 mr-1.5" /> Dispatch to Grievance Officer
-                              </Button>
+                              <>
+                                {td.dmcaLetter?.includes('Digital Millennium Copyright Act') && (
+                                  <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold shadow-lg" onClick={() => handleDispatch(td)}>
+                                    <Send className="h-4 w-4 mr-1.5" /> Submit to DMCA.com
+                                  </Button>
+                                )}
+                                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold shadow-lg" onClick={() => handleEmailLawyer(td)}>
+                                  <Scale className="h-4 w-4 mr-1.5" /> Email Lawyer
+                                </Button>
+                              </>
                             )}
                             {td.status === 'sent' && (
                               <>
@@ -390,6 +474,11 @@ export default function TakedownPage() {
                                 <Button size="sm" variant="default" className="bg-green-600 hover:bg-green-700 text-white rounded-full font-medium shadow-lg" onClick={() => updateStatus(td.id, 'resolved')}>
                                   <CheckCircle2 className="h-4 w-4 mr-1.5" /> Content Removed
                                 </Button>
+                                {td.externalTicketId && (
+                                  <Button size="sm" variant="destructive" className="rounded-full font-medium shadow-lg ml-auto" onClick={() => handleCancel(td)}>
+                                    <XCircle className="h-4 w-4 mr-1.5" /> Cancel DMCA Case
+                                  </Button>
+                                )}
                               </>
                             )}
                             {td.status === 'acknowledged' && (

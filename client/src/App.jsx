@@ -21,9 +21,12 @@ import NotificationsPage from '@/pages/NotificationsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import ArtifactsPage from '@/pages/ArtifactsPage';
 import ProofPage from '@/pages/ProofPage';
+import MockAadhaarPage from '@/pages/MockAadhaarPage';
+import DataRetentionPage from '@/pages/DataRetentionPage';
 import { Loader2 } from 'lucide-react';
-import { ToastProvider } from '@/components/ui/toast'; 
- 
+import { ToastProvider } from '@/components/ui/toast';
+import PrampBot from '@/components/pramp/PrampBot';
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
@@ -40,7 +43,7 @@ function ProtectedRoute({ children }) {
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, passport, loading } = useAuth();
 
   if (loading) {
     return (
@@ -52,7 +55,7 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+      <Route path="/login" element={user ? <Navigate to={!passport?.username ? "/setup" : "/dashboard"} /> : <Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/setup" element={<ProtectedRoute><Setup /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -61,8 +64,10 @@ function AppRoutes() {
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/takedowns" element={<ProtectedRoute><TakedownPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/mock-aadhaar" element={<MockAadhaarPage />} />
       <Route path="/verify" element={<VerifyPage />} />
       <Route path="/registry" element={<RegistryPage />} />
+      <Route path="/data-retention" element={<DataRetentionPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/legal-guide" element={<LegalGuidePage />} />
@@ -106,6 +111,7 @@ export default function App() {
         <AuthProvider>
           <ErrorBoundary>
             <AppRoutes />
+            <PrampBot />
           </ErrorBoundary>
         </AuthProvider>
       </ToastProvider>
