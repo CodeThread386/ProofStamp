@@ -28,9 +28,9 @@ async function createUserWithPassport({ email, displayName, googleId = null, ava
   const user = await prisma.user.create({
     data: {
       email: email.toLowerCase().trim(),
-      googleId: googleId || undefined,
+      googleId: googleId || null,
       emailVerified: true,
-      avatarUrl: avatarUrl || undefined,
+      avatarUrl: avatarUrl || null,
       passport: {
         create: {
           id: passportId,
