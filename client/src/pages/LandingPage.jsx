@@ -92,7 +92,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 md:mb-24 max-w-4xl mx-auto">
             <h2 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-white mb-4 md:mb-6 leading-tight">The end-to-end creator journey.</h2>
-            <p className="text-lg sm:text-2xl text-white/50 font-medium tracking-tight leading-relaxed">From raw upload to a court-admissible evidence package in seconds. No legal background required.</p>
+            <p className="text-lg sm:text-2xl text-white/50 font-medium tracking-tight leading-relaxed">From raw upload to a BSA 2023 Section 63 compliant evidence package in seconds. No legal background required.</p>
           </div>
           
           <div className="grid lg:grid-cols-3 gap-8">
@@ -107,13 +107,13 @@ export default function LandingPage() {
                 step: '02',
                 icon: Shield,
                 title: 'Automated Legal Prep',
-                desc: 'Skip the lawyer fees. We automatically bind your verified identity to a court-admissible Section 63 certificate.',
+                desc: 'No more manual paperwork. We automatically bind your Aadhaar-verified identity to a BSA 2023 Section 63 structured certificate — ready for your advocate.',
               },
               {
                 step: '03',
                 icon: FileText,
                 title: 'Takedown Ready',
-                desc: `Enforce your rights effortlessly. Download pre-assembled ${MARKETING.counselPacketName}s ready for DMCA takedowns and litigation.`,
+                desc: `Enforce your rights immediately. Download pre-assembled ${MARKETING.counselPacketName}s ready for DMCA takedowns and litigation.`,
               },
             ].map((item) => (
               <div key={item.step} className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] apple-glass-panel apple-shadow relative group flex flex-col items-start text-left hover:-translate-y-2 transition-all duration-500">
@@ -147,13 +147,13 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-tight">Your end-to-end legal shield.</h2>
+              <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white mb-6 md:mb-8 leading-tight">Your end-to-end evidence infrastructure.</h2>
               <p className="text-lg sm:text-2xl text-white/50 mb-10 md:mb-16 font-medium tracking-tight leading-relaxed">We bridge the gap between technical proof and courtroom readiness, automating the legal scaffolding you need to protect your work.</p>
               
               <div className="space-y-8 md:space-y-10">
                 {[
-                  { icon: Fingerprint, title: 'Verified Authorship', desc: 'Bind your real-world identity to your digital creations permanently.' },
-                  { icon: Scale, title: 'Instant Affidavits', desc: 'Automatically generate legal documentation compliant with the BSA 2023.' },
+                  { icon: Fingerprint, title: 'Verified Authorship', desc: 'Bind your real-world identity to your digital creations with a cryptographically-sealed, immutable record.' },
+                  { icon: Scale, title: 'Instant Certificates', desc: 'Automatically generate BSA 2023 Section 63 structured certificates — with Part B signed by a government-notified forensic examiner.' },
                   { icon: Eye, title: 'Invisible Protection', desc: 'Protect your visual assets without compromising aesthetics using imperceptible watermarks.' },
                   { icon: Lock, title: 'Frictionless Enforcement', desc: 'Export everything your advocate needs with a single click.' },
                 ].map((item) => (
@@ -178,14 +178,14 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16 md:mb-24">
             <h2 className="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter text-white">Why ProofStamp.</h2>
-            <p className="text-lg sm:text-2xl text-white/50 mt-4 md:mt-6 font-medium tracking-tight">Comprehensive legal readiness, out of the box.</p>
+            <p className="text-lg sm:text-2xl text-white/50 mt-4 md:mt-6 font-medium tracking-tight">Court-ready evidence infrastructure, out of the box.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-8">
             {[
               { vs: 'Basic Digital Signatures', win: 'A signature just proves who signed it. We provide an independent time-witness, invisible watermarks, and a complete legal evidence packet.' },
               { vs: 'Standard Provenance Tools', win: 'Traditional tools only prove technical origin. We bridge the gap to litigation by providing the specific legal scaffolding required by courts.' },
-              { vs: '"Emailing Yourself"', win: 'Emails and simple cloud uploads are legally flimsy. We generate robust, cryptographically secure affidavits instantly.' },
-              { vs: 'Copyright Office', win: 'Get instant, automated cryptographic evidence today, without the bureaucratic delays, paperwork, or high filing fees.' },
+              { vs: '"Emailing Yourself"', win: 'Emails and simple cloud uploads are legally flimsy. We generate robust, cryptographically-secured BSA 2023 certificates — independently verifiable, tamper-evident, court-structured.' },
+              { vs: 'Copyright Office', win: 'Get instant cryptographic evidence of creation today — complementing copyright registration with the timestamped proof that makes it enforceable.' },
             ].map((item) => (
                <div key={item.vs} className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] apple-glass-panel border border-white/10 hover:-translate-y-1 transition-transform duration-300">
                  <div className="flex items-center gap-3 md:gap-4 mb-5 md:mb-6">
