@@ -477,7 +477,7 @@ export default function StampPage() {
                 </Link>
               </Button>
               <Button variant="outline" className="rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white h-11" asChild>
-                <Link to="/legal-guide">What this proves</Link>
+                <Link to="/faqs">What this proves</Link>
               </Button>
             </div>
 

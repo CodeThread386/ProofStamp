@@ -320,7 +320,7 @@ function VerificationResult({ result, onReset }) {
               )}
               <p className="text-xs font-medium text-white/30 pt-2 border-t border-indigo-500/20 mt-2">
                 Technical verification only — not a legal ruling.{' '}
-                <Link to="/legal-guide" className="text-indigo-400 hover:text-indigo-300">Learn more</Link>
+                <Link to="/faqs" className="text-indigo-400 hover:text-indigo-300">Learn more</Link>
               </p>
             </div>
           )}

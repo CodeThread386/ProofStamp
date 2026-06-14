@@ -16,7 +16,7 @@ import TakedownPage from '@/pages/TakedownPage';
 import RegistryPage from '@/pages/RegistryPage';
 import TermsPage from '@/pages/TermsPage';
 import PrivacyPage from '@/pages/PrivacyPage';
-import LegalGuidePage from '@/pages/LegalGuidePage';
+import FaqPage from '@/pages/FaqPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import ArtifactsPage from '@/pages/ArtifactsPage';
@@ -70,7 +70,7 @@ function AppRoutes() {
       <Route path="/data-retention" element={<DataRetentionPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/legal-guide" element={<LegalGuidePage />} />
+      <Route path="/faqs" element={<FaqPage />} />
       <Route path="/p/:stampId" element={<SharePage />} />
       <Route path="/legal/:stampId/artifacts" element={<ArtifactsPage />} />
       <Route path="/stamps/:stampId/proof" element={<ProofPage />} />

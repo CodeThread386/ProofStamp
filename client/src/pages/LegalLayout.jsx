@@ -34,7 +34,7 @@ export default function LegalLayout({ title, children, maxWidth = 'max-w-3xl', s
           <footer className="mt-12 pt-8 border-t border-white/10 text-sm text-white/50 flex flex-wrap gap-6">
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link to="/legal-guide" className="hover:text-white transition-colors">Legal Guide</Link>
+            <Link to="/faqs" className="hover:text-white transition-colors">FAQs</Link>
           </footer>
         </div>
       </main>

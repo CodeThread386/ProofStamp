@@ -189,7 +189,7 @@ export default function PrampBot() {
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">Pramp</h3>
-              <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Legal Guide AI</p>
+              <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">FAQs AI</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

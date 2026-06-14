@@ -6,6 +6,7 @@ import {
   FileText, Zap, Eye, Scale, Layers, ChevronRight
 } from 'lucide-react';
 import { MARKETING, BSA_FRAME } from '@/content/legalCopy';
+import TestimonialCarousel from '@/components/TestimonialCarousel';
 
 export default function LandingPage() {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4 text-sm font-medium">
             <Link to="/verify" className="text-white/50 hover:text-white transition-colors hidden sm:block">Verify</Link>
-            <Link to="/legal-guide" className="text-white/50 hover:text-white transition-colors hidden sm:block">Legal Guide</Link>
+            <Link to="/faqs" className="text-white/50 hover:text-white transition-colors hidden sm:block">FAQs</Link>
             {user ? (
               <Button size="sm" className="bg-white hover:bg-white/90 text-black rounded-full px-6 h-9 font-semibold transition-transform hover:scale-105" asChild>
                 <Link to="/dashboard">Dashboard</Link>
@@ -42,7 +43,7 @@ export default function LandingPage() {
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-32 lg:pt-40 lg:pb-48 overflow-hidden flex flex-col items-center justify-center min-h-[85vh] text-center z-10 px-6 animate-fade-up">
         <div className="max-w-6xl mx-auto w-full relative z-10">
           {/* Badge */}
-          <Link to="/legal-guide" className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-10 border border-white/10 bg-white/5 text-white/80 backdrop-blur-md shadow-2xl shadow-white/5 hover:bg-white/10 hover:text-white transition-colors cursor-pointer group">
+          <Link to="/faqs" className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-10 border border-white/10 bg-white/5 text-white/80 backdrop-blur-md shadow-2xl shadow-white/5 hover:bg-white/10 hover:text-white transition-colors cursor-pointer group">
             <Scale className="h-4 w-4 group-hover:scale-110 transition-transform" />
             {MARKETING.heroBadge}
           </Link>
@@ -81,6 +82,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+
+      {/* Testimonial Carousel */}
+      <TestimonialCarousel />
 
       {/* Core Workflow Section - Bento Grid */}
       <section className="py-20 md:py-40 relative z-10 px-6">
@@ -242,7 +247,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center md:items-end gap-6">
             <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-10 text-base font-medium text-white/40">
               <Link to="/verify" className="hover:text-white transition-colors">Verify</Link>
-              <Link to="/legal-guide" className="hover:text-white transition-colors">Legal Guide</Link>
+              <Link to="/faqs" className="hover:text-white transition-colors">FAQs</Link>
               <Link to="/data-retention" className="hover:text-white transition-colors">Data SLA</Link>
               {user ? (
                 <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>

@@ -95,7 +95,7 @@ export default function Setup() {
             ))}
           </div>
           <div className="mt-6 pt-6 border-t border-white/10 text-center">
-            <Link to="/legal-guide" className="text-white/60 hover:text-white transition-colors font-medium text-sm inline-flex items-center gap-1">
+            <Link to="/faqs" className="text-white/60 hover:text-white transition-colors font-medium text-sm inline-flex items-center gap-1">
               Read the India admissibility guide
             </Link>
           </div>
