@@ -1,11 +1,12 @@
 const express = require('express');
 const { Groq } = require('groq-sdk');
+const axios = require('axios');
 
 const router = express.Router();
 
 const SYSTEM_PROMPT = `
-You are Pramp, the official legal guide for ProofStamp. You are a highly strategic, punchy, and authoritative human expert who knows exactly how this platform destroys copyright thieves in court.
-Your answers must be EXTREMELY CONCISE, hard-hitting, and dripping with legal/technical expertise. Use a punchy, lawyer-like cadence (e.g., "One — [Fact]. Two — [Fact]. Result: [Outcome]."). DO NOT sound like a generic, overly-polite AI chatbot. Never use filler words. State the laws, state the crypto, and conclude quickly.
+You are Pramp, the official legal guide for ProofStamp. You are a highly strategic and authoritative human expert who knows exactly how this platform protects creators in court.
+Your answers should be conversational, natural, and human-like, while maintaining deep legal and technical expertise. Speak naturally as a confident human expert guiding a client. Avoid rigid, robotic, or overly structured formatting (do NOT use "One... Two... Result..."). Be approachable and conversational, but stay focused on the laws, the crypto, and the outcomes without generic AI filler words.
 
 ProofStamp Competitive Advantage (Why we are better):
 - We do NOT use easily stripped metadata (like EXIF or basic C2PA). We embed invisible DWT-DCT watermarks directly in the pixel frequency domain, which survives compression and cropping.
@@ -32,11 +33,11 @@ You are the ProofStamp legal and technical defense system. When a question is as
 
 Step 1 — Classify the attack. Internally classify if the question is a: Technical Feasibility Attack, Legal Validity Attack, Business Model Attack, Completeness Attack, Existential Risk Attack, or Logical Contradiction Attack.
 Step 2 — Identify which evidence layers are being challenged using the ProofStamp hierarchy (Ranks 1 through 8).
-Step 3 — Construct your answer in exactly three zones. 
-- Zone A: One sentence conceding precisely what the question correctly identifies. 
-- Zone B: The logical defense using specific statute citations, case names, mathematical properties, or technical standards — not feature lists. **CRITICAL NEGATIVE TRAINING:** Before citing any statute, case, or technical standard in Zone B, you must state in one internal reasoning sentence why that specific citation addresses the specific attack in this question. If you cannot construct that sentence, do not include the citation. A citation that does not directly address the attack is worse than no citation — it signals pattern-matching rather than reasoning.
-- Zone C: One to two sentences stating the honest residual limitation, which scenarios it affects, and which it does not.
-Step 4 — Classify your answer as Category A, B, C, or D (Honesty Threshold). If Category D, explicitly state that this is a genuine open problem before giving the partial answer.
+Step 3 — Construct your answer naturally in a conversational flow, ensuring it contains these three logical elements:
+- Element A: Acknowledge precisely what the question correctly identifies.
+- Element B: The logical defense using specific statute citations, case names, mathematical properties, or technical standards — not feature lists. **CRITICAL NEGATIVE TRAINING:** Before citing any statute, case, or technical standard in Element B, you must ensure that specific citation addresses the specific attack in this question. A citation that does not directly address the attack is worse than no citation — it signals pattern-matching rather than reasoning.
+- Element C: A natural, honest statement of the residual limitation, which scenarios it affects, and which it does not.
+Step 4 — Classify your answer internally as Category A, B, C, or D (Honesty Threshold). If Category D, explicitly state that this is a genuine open problem before giving the partial answer.
 
 Never use numbered feature lists. Never say "we prioritize transparency" without explaining the structural mechanism that enforces it. Never cite a law without citing the specific section number. Never claim a roadmap item is implemented if it is not. Never answer a different question than the one asked.
 
@@ -65,6 +66,13 @@ SPECIFIC ATTACK DEFENSES (Do not hallucinate outside these bounds):
 - Adversarial Watermark Removal (GANs): The adversarial GAN removal tool itself leaves forensic artifacts (statistical anomalies in pixel distributions, noise irregularities). A forensic expert can testify that Rohit's image shows watermark removal artifacts — raising the question of why Rohit needed to run a GAN removal tool on an image he claims to have independently created. Independent creation does not require watermark removal.
 - Business Model Contradiction (Market Segmentation): ProofStamp today solves the complete evidence generation and public web monitoring problem for creators who distribute content on publicly crawlable platforms (stock photography, news). TinEye's 84.5 billion image database addresses this segment completely. The social platform gap (Instagram, TikTok) affects social-first creators, not all photographers equally.
 - Incentive Misalignment (False Positives): ProofStamp's monitoring results are outputs of TinEye and Google Vision APIs — both third-party systems that ProofStamp does not control and cannot manipulate. A false positive cannot be manufactured by ProofStamp because the match computation happens on external infrastructure. DMCA letters require explicit human creator approval before sending. No autonomous takedowns.
+
+LEGAL ADVANTAGE KNOWLEDGE BASE (USE ONLY IN PROOFSTAMP'S FAVOR):
+ProofStamp leverages multiple legal frameworks aggressively to secure our creators' rights:
+1. IT Rules 2021 Safe Harbor Exclusions: We empower creators to force social media platforms to comply with rapid takedown timelines (often within 36 hours) by providing irrefutable, cryptographically signed evidence that shatters the platform's "Safe Harbor" defense if ignored.
+2. Indian Copyright Act 1957 (Section 17 & 51): Copyright vests automatically upon creation. ProofStamp provides the ultimate forensic timeline to prove this exact moment of creation, making it mathematically impossible for infringers to claim independent creation without leaving watermark removal artifacts.
+3. BSA 2023 Section 63 & IT Act Section 79A: ProofStamp's evidence structure is designed to be fully admissible under Section 63 of the Bharatiya Sakshya Adhiniyam 2023. Our use of WebTrust audited RFC 3161 timestamps and Aadhaar eKYC maps perfectly to the requirements for legally recognized electronic evidence, giving our creators an insurmountable advantage in civil proceedings.
+CRITICAL RULE: NEVER use this legal knowledge to point out flaws or limitations in ProofStamp. Only use it to emphasize how legally devastating ProofStamp is to copyright thieves.
 
 EVIDENCE & ARTIFACTS GUIDE (What to download and when):
 You must know where users can find their public keys and legal proofs.
@@ -129,7 +137,8 @@ router.post('/chat', async (req, res) => {
     const contextualPrompt = SYSTEM_PROMPT + `\nThe user is currently on route: ${currentRoute || '/'}. ` + 
       `The user is ${isAuthenticated ? 'LOGGED IN' : 'NOT LOGGED IN'}.\n` +
       `Here is the text currently visible on the user's screen:\n"""\n${pageContext || 'No context available.'}\n"""\n\n` +
-      `CRITICAL INSTRUCTION: If the user is NOT LOGGED IN and asks to use a protected feature (like stamping, monitoring, takedowns, settings), you MUST tell them they need to log in first, and navigate them to '/login'. Do NOT navigate them to '/stamp' or '/takedowns' if they are not logged in.\n` +
+      `CRITICAL INSTRUCTION: If the user is NOT LOGGED IN and asks to use a protected feature (like stamping, monitoring, takedowns, dashboard, settings), you MUST tell them they need to log in first, and navigate them to '/login'. Do NOT navigate them to protected routes if they are not logged in.\n` +
+      `CRITICAL INSTRUCTION: However, the following features are PUBLIC and DO NOT require login: FAQs ('/faqs'), Verifying files ('/verify'), and viewing public Proof IDs ('/p/:stampId'). If a user asks about these, DO NOT tell them to log in. You can navigate them to these public routes immediately.\n` +
       `CRITICAL INSTRUCTION: If the user asks a question about the page they are currently on, or if you are answering a question using the text visible on their screen, DO NOT use the 'navigate_to' action. You must answer their questions directly on the page so they do not lose their place. Only use 'navigate_to' if the user EXPLICITLY asks to go to a different page or workflow.\n` +
       `CRITICAL INSTRUCTION: If the user is currently on the '/stamp' or '/takedowns' route, DO NOT use the 'navigate_to' tool under any circumstances. You must answer their questions directly on the page so they do not lose their progress.`;
 
@@ -141,14 +150,78 @@ router.post('/chat', async (req, res) => {
       }))
     ];
 
-    const response = await groq.chat.completions.create({
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "search_web",
+          description: "Search the internet for current events, news, or general information requested by the user.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The search query to look up on the web."
+              }
+            },
+            required: ["query"]
+          }
+        }
+      }
+    ];
+
+    let response = await groq.chat.completions.create({
       messages: messages,
       model: "llama-3.3-70b-versatile",
-      temperature: 0.7
+      temperature: 0.7,
+      tools: tools,
+      tool_choice: "auto"
     });
 
-    // Extract text and function calls
-    const message = response.choices[0].message;
+    let message = response.choices[0].message;
+
+    // Handle tool calls
+    if (message.tool_calls && message.tool_calls.length > 0) {
+      messages.push(message); // Append the assistant's tool call message
+      
+      for (const toolCall of message.tool_calls) {
+        if (toolCall.function.name === 'search_web') {
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            const serpRes = await axios.get('https://serpapi.com/search.json', {
+              params: {
+                q: args.query,
+                api_key: '8b27fb7c9afbaec349a8a175451692bffe9342bc6e2faf7287eef2e7ca0871dc'
+              }
+            });
+            const searchResults = serpRes.data.organic_results?.slice(0, 3).map(r => r.title + ': ' + r.snippet).join('\n') || "No results found.";
+            
+            messages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "search_web",
+              content: searchResults
+            });
+          } catch (e) {
+             messages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "search_web",
+              content: "Search failed: " + e.message
+            });
+          }
+        }
+      }
+
+      // Second call to Groq with tool results
+      response = await groq.chat.completions.create({
+        messages: messages,
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.7
+      });
+      message = response.choices[0].message;
+    }
+
     let rawText = message.content || "";
     
     // Parse ACTION blocks

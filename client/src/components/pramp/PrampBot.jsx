@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PrampAvatar from './PrampAvatar';
-import { Send, X, Loader2, Square, Trash2 } from 'lucide-react';
+import { Send, X, Loader2, Square, Trash2, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth';
 
@@ -19,6 +19,8 @@ export default function PrampBot() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [isCelebrating, setIsCelebrating] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 384, height: 500 });
   const [avatarMessage, setAvatarMessage] = useState('');
   const [abortController, setAbortController] = useState(null);
   
@@ -166,6 +168,32 @@ export default function PrampBot() {
     }
   };
 
+  const handleResizeMouseDown = (e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = dimensions.width;
+    const startHeight = dimensions.height;
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = startX - moveEvent.clientX;
+      const deltaY = startY - moveEvent.clientY;
+      
+      setDimensions({
+        width: Math.max(300, Math.min(window.innerWidth * 0.9, startWidth + deltaX)),
+        height: Math.max(400, Math.min(window.innerHeight * 0.8, startHeight + deltaY))
+      });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <>
       {/* Pramp Avatar */}
@@ -180,10 +208,30 @@ export default function PrampBot() {
 
       {/* Chat Window */}
       <div 
-        className={`fixed z-[90] bottom-32 right-8 w-80 sm:w-96 bg-black/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'}`}
+        style={!isExpanded ? { width: dimensions.width, height: dimensions.height } : {}}
+        className={`fixed z-[90] flex flex-col bg-black/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden transition-[transform,opacity,inset] duration-500 origin-bottom-right ${
+          !isOpen 
+            ? 'bottom-32 right-8 scale-90 opacity-0 translate-y-10 pointer-events-none' 
+            : isExpanded 
+              ? 'top-4 left-4 right-4 bottom-4 w-auto h-auto scale-100 opacity-100 translate-y-0' 
+              : 'bottom-32 right-8 scale-100 opacity-100 translate-y-0'
+        }`}
       >
+        {/* Custom Top-Left Resizer Handle */}
+        {!isExpanded && (
+          <div 
+            onMouseDown={handleResizeMouseDown}
+            className="absolute top-0 left-0 w-6 h-6 cursor-nwse-resize z-50 opacity-60 hover:opacity-100 transition-opacity group"
+            title="Drag to resize"
+          >
+            <div className="absolute top-0 left-0 w-5 h-5 border-t-[5px] border-l-[5px] border-white/90 rounded-tl-3xl group-hover:scale-110 transition-transform origin-top-left" />
+          </div>
+        )}
         <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
           <div className="flex items-center gap-3">
+            <button onClick={() => setIsExpanded(!isExpanded)} className="text-white/50 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10" title={isExpanded ? "Minimize" : "Expand"}>
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </button>
             <div className="w-8 h-8 rounded-full bg-[#F4D09C]/20 flex items-center justify-center">
               🐶
             </div>
@@ -202,7 +250,7 @@ export default function PrampBot() {
           </div>
         </div>
 
-        <div className="h-96 p-4 overflow-y-auto flex flex-col gap-4">
+        <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 min-h-0">
           {messages.map((msg, idx) => {
             if (!msg.text) return null;
             
